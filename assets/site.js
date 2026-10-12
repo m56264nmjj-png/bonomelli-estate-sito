@@ -100,6 +100,15 @@
     document.querySelectorAll('.aepanel').forEach(function(p){p.hidden=p.dataset.ae!==t.dataset.ae});
   })});
 
+
+  /* COROLLA: tre versioni, stesse due viste */
+  var ct=document.querySelectorAll('[data-c][role="tab"]');
+  var cnote={base:['La seduta poggia su un anello di pietra, come un fiore sul suo vaso.','The seat rests on a stone ring, like a flower on its vase.'],guscio:['La pietra avvolge la seduta come un calice; i petali dello schienale sono arrotondati.','Stone wraps the seat like a chalice; the back petals are rounded.'],affilato:['Lo stesso guscio di pietra, con i petali dello schienale più slanciati e appuntiti.','The same stone shell, with slimmer, pointed back petals.']};
+  ct.forEach(function(t){t.addEventListener('click',function(){
+    ct.forEach(function(x){x.setAttribute('aria-selected',x===t?'true':'false')});
+    var v=t.dataset.c;document.getElementById('c1').src='img/corolla-'+v+'-1.webp';document.getElementById('c2').src='img/corolla-'+v+'-2.webp';
+    var n=document.getElementById('c-note');n.children[0].textContent=cnote[v][0];n.children[1].textContent=cnote[v][1];
+  })});
   var tabs=document.querySelectorAll('#serra .variants button');
   var p=[document.getElementById('p1'),document.getElementById('p2'),document.getElementById('p3')];
   var parts=['galleria','alto','dettaglio'];
