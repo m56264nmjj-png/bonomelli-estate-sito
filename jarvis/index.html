@@ -217,7 +217,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
       <div class="panel" id="cli-detail">
         <p class="eyebrow">Come funziona</p>
         <h2>Ogni mattina nuovi clienti veri</h2>
-        <p>Il Cacciatore cerca ville, hotel e tenute con un progetto in corso. Per ognuno trovi il motivo, la fonte e l'email già scritta come la tua email tipo. La copi, la invii tu da studio@bonomelliestate.it e segni qui cosa è successo.</p>
+        <p>Il Cacciatore cerca ville, hotel e tenute con un progetto in corso. Per ognuno trovi il motivo, la fonte e l'email già scritta come la tua email tipo. E per ognuno anche la persona giusta su LinkedIn, con il messaggio pronto. Lo invii tu e segni qui cosa è successo.</p>
         <p class="note">Classe A: cercano già un designer. Classe B: progetto in corso. Classe C: luogo adatto.</p>
       </div>
     </div>
@@ -336,7 +336,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const safeUrl=u=>/^https:\/\//i.test(String(u||""))?String(u):"";
 const fmtDate=iso=>{const d=new Date(iso);return isNaN(d)?"":d.toLocaleString("it-IT",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});};
 const days=iso=>{const d=new Date(iso);return isNaN(d)?0:Math.floor((Date.now()-d)/864e5);};
-const CST={da_contattare:"Da contattare",inviato:"Email inviata",risposta:"Ha risposto",trattativa:"In trattativa",chiuso:"Chiuso"};
+const CST={da_contattare:"Da contattare",inviato:"Contattato",risposta:"Ha risposto",trattativa:"In trattativa",chiuso:"Chiuso"};
 const JLBL={in_lavorazione:"in preparazione",inviata:"risposta inviata",da_approvare:"da approvare",approvata:"in invio",scartata:"scartata",errore:"errore"};
 const LBL={tipo:{consulenza:"Consulenza privata",dossier:"Dossier riservato",collaborazione:"Collaborazione",altro:"Altro"},
   profilo:{privato:"Privato",architetto:"Architetto o designer",broker:"Broker o agente",hotel:"Hotel o resort",azienda:"Azienda",altro:"Altro"},
@@ -447,7 +447,7 @@ function renderCliDetail(){
     <h2>${esc(c.nome)}</h2>
     <dl class="facts">
       ${c.luogo?`<div><dt>Dove</dt><dd>${esc(c.luogo)}</dd></div>`:""}
-      <div><dt>Chi contattare</dt><dd>${esc(c.chi||"da cercare")}</dd></div>
+      <div><dt>Chi contattare per email</dt><dd>${esc(c.chi||"da cercare")}</dd></div>
       <div><dt>Stato</dt><dd>${esc(CST[st]||st)}${c.aggiornato_at&&st!=="da_contattare"?" · "+esc(fmtDate(c.aggiornato_at)):""}</dd></div>
     </dl>
     ${c.perche?`<div><p class="eyebrow">Perché è adatto</p><p>${esc(c.perche)}</p></div>`:""}
@@ -458,9 +458,17 @@ function renderCliDetail(){
       <blockquote>${esc(c.messaggio)}</blockquote>
       ${c.traduzione?`<p class="note">In italiano: ${esc(c.traduzione)}</p>`:""}
       <div class="btnrow"><button class="btn" id="cl-copy" type="button">Copia il testo</button>${mail?`<a class="btn ghost" href="${esc(mail)}">Apri nell'email</a>`:""}<button class="btn ghost" id="cl-edit" type="button">Modifica in Scrivi</button></div></div>`:""}
+    <div class="jbox"><p class="eyebrow">LinkedIn</p>
+      <p><strong style="font-weight:500">Chi:</strong> ${esc(c.li_persona||c.chi||"da cercare")}</p>
+      ${c.li_messaggio?`<blockquote>${esc(c.li_messaggio)}</blockquote><p class="note">${esc(c.li_messaggio.length)} caratteri: entra nella nota del collegamento (massimo 300).</p>`:""}
+      <div class="btnrow">${c.li_messaggio?`<button class="btn" id="li-copy" type="button">Copia il messaggio</button>`:""}
+        <a class="btn ghost" href="${esc(safeUrl(c.li_profilo)||("https://www.linkedin.com/search/results/people/?keywords="+encodeURIComponent(c.nome)))}" target="_blank" rel="noopener">Trova la persona</a>
+        <a class="btn ghost" href="${esc(safeUrl(c.li_azienda)||("https://www.linkedin.com/search/results/companies/?keywords="+encodeURIComponent(c.nome)))}" target="_blank" rel="noopener">Pagina dell'azienda</a></div>
+      <p class="note">Su LinkedIn: apri il profilo, tocca Collegati, poi “Aggiungi una nota” e incolla il messaggio.</p></div>
     <div><p class="eyebrow">Cosa è successo</p><div class="btnrow">${Object.keys(CST).map(s=>`<button class="btn ghost" data-cs="${s}" type="button" ${st===s?'aria-pressed="true" disabled':""}>${CST[s]}</button>`).join("")}</div>
-    <p class="note">Segna “Email inviata” solo dopo averla inviata tu. JARVIS non invia niente.</p><p class="err" id="cl-err" hidden></p></div>`;
+    <p class="note">Segna “Contattato” solo dopo aver scritto tu (email o LinkedIn). JARVIS non invia niente.</p><p class="err" id="cl-err" hidden></p></div>`;
   const cp=$("cl-copy");if(cp)cp.addEventListener("click",e=>copyText(c.messaggio,e.currentTarget));
+  const lc=$("li-copy");if(lc)lc.addEventListener("click",e=>copyText(c.li_messaggio,e.currentTarget));
   const ed=$("cl-edit");if(ed)ed.addEventListener("click",()=>{$("e-cli").value=c.slug;fromClient();openTab("scr");});
   $("cli-detail").querySelectorAll("[data-cs]").forEach(b=>b.addEventListener("click",async()=>{
     b.disabled=true;const {error}=await sb.from("app_clienti").update({stato:b.dataset.cs,aggiornato_at:new Date().toISOString()}).eq("slug",c.slug);
