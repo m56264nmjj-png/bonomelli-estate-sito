@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /jarvis/
 
 Sitemap: https://bonomelliestate.com/sitemap.xml

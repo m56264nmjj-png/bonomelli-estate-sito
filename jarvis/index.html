@@ -1,0 +1,710 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JARVIS · Bonomelli Estate</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#11150f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JARVIS">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+/* Lo studio di notte, come bonomelliestate.com: fondo verde-nero, travertino per il testo, bronzo come unico accento, maiuscole romane, fregio greco. */
+@font-face{font-family:"Cinzel";src:url("../fonts/cinzel.woff") format("woff");font-weight:400 900;font-display:swap}
+@font-face{font-family:"Work Sans";src:url("../fonts/worksans.woff") format("woff");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Work Sans";src:url("../fonts/worksans-italic.woff") format("woff");font-weight:100 900;font-style:italic;font-display:swap}
+:root{
+  --bg:#11150f; --panel:#181d16; --ink:#e8e2d4; --muted:#a9a596; --line:#2d3429;
+  --brass:#c4a571; --brass-soft:rgba(196,165,113,.12); --ok:#8fc29f; --warn:#e0b067; --bad:#e58b8b;
+  --display:"Cinzel","Times New Roman",serif; --body:"Work Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  --frieze:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='12' viewBox='0 0 24 12'%3E%3Cpath d='M0 11.5H3.5V.5H19.5V8.5H10.5V4.5H15.5M3.5 11.5H24' fill='none' stroke='%23c4a571' stroke-width='1'/%3E%3C/svg%3E");
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font:300 17px/1.65 var(--body);padding:env(safe-area-inset-top) max(16px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(16px,env(safe-area-inset-left));-webkit-text-size-adjust:100%}
+.app{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:22px;padding-block:22px 48px}
+.frieze{height:12px;background-image:var(--frieze);background-repeat:repeat-x;background-size:24px 12px;opacity:.55}
+header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+.brand h1{font-family:var(--display);font-weight:400;font-size:clamp(24px,4vw,30px);letter-spacing:.32em;margin:0;line-height:1}
+.brand p{margin:0;font-size:12px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.status{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;padding:6px 10px;border:1px solid var(--line);color:var(--muted);display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.chip i{width:6px;height:6px;border-radius:50%;background:var(--muted)}
+.chip.ok i{background:var(--ok)} .chip.bad i{background:var(--bad)}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--line);scrollbar-width:none}
+nav.tabs button{font:500 12px var(--body);letter-spacing:.18em;text-transform:uppercase;background:none;border:0;color:var(--muted);padding:14px 12px;border-bottom:1px solid transparent;margin-bottom:-1px;cursor:pointer;white-space:nowrap;min-height:44px}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--brass)}
+nav.tabs .count{font-family:var(--mono);letter-spacing:0;color:var(--brass);margin-left:6px}
+button,select,textarea,input{font:inherit;color:inherit}
+.btn{border:1px solid var(--brass);background:var(--brass);color:var(--bg);padding:11px 18px;cursor:pointer;font:500 12px var(--body);letter-spacing:.16em;text-transform:uppercase;min-height:44px;text-decoration:none;display:inline-flex;align-items:center}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--brass)}
+.btn:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:1px solid var(--brass);outline-offset:4px}
+a{color:var(--brass)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.split{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:820px){.split{grid-template-columns:minmax(0,1fr)}}
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.filters button{border:1px solid var(--line);background:transparent;padding:7px 12px;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;color:var(--muted);min-height:36px}
+.filters button[aria-pressed="true"]{border-color:var(--brass);color:var(--ink);background:var(--brass-soft)}
+.list{display:flex;flex-direction:column;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;padding:14px 6px;border:0;border-bottom:1px solid var(--line);cursor:pointer;background:none;text-align:left;width:100%}
+.row:hover{background:var(--brass-soft)}
+.row[aria-current="true"]{background:var(--brass-soft);box-shadow:inset 1px 0 0 var(--brass)}
+.row .n{font-family:var(--display);font-weight:400;letter-spacing:.06em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .d{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.row .s{grid-column:1/-1;font-size:13px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pill{font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;padding:2px 8px;border:1px solid currentColor}
+.js{font-weight:500}.js.inviata{color:var(--ok)}.js.da_approvare{color:var(--warn)}.js.errore,.js.scartata{color:var(--bad)}
+.pill.nuova{color:var(--warn)} .pill.in_corso{color:var(--brass)} .pill.chiusa{color:var(--ok)}
+.pill.cl-A{color:var(--ok)} .pill.cl-B{color:var(--brass)} .pill.cl-C{color:var(--muted)}
+.pill.st-da_contattare{color:var(--warn)} .pill.st-inviato{color:var(--brass)} .pill.st-risposta,.pill.st-trattativa{color:var(--ok)} .pill.st-chiuso{color:var(--muted)}
+.jbox{border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:10px}
+.panel{background:var(--panel);border-top:1px solid var(--line);padding:24px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.panel h2{font-family:var(--display);font-weight:400;font-size:clamp(22px,3vw,30px);letter-spacing:.05em;line-height:1.15;margin:0}
+.eyebrow{font-size:12px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);margin:0}
+dl.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px 22px;margin:0}
+dl.facts dt{font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+dl.facts dd{margin:3px 0 0;overflow-wrap:anywhere;user-select:text;-webkit-user-select:text}
+blockquote{margin:0;padding:14px 18px;border-left:1px solid var(--brass);white-space:pre-wrap;overflow-wrap:anywhere;font-style:italic;user-select:text;-webkit-user-select:text}
+textarea{width:100%;min-height:150px;padding:14px;border:1px solid var(--line);background:var(--bg);resize:vertical;line-height:1.6;font-size:16px}
+select,input[type=text],input[type=email],input[type=password]{padding:9px 11px;border:1px solid var(--line);background:var(--bg);min-height:44px;font-size:16px;max-width:100%}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+label.f input,label.f select,label.f textarea{text-transform:none;letter-spacing:0;font-weight:300;color:var(--ink);width:100%}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.form .wide{grid-column:1/-1}
+.note{font-size:14px;color:var(--muted);margin:0}
+.err{color:var(--bad);font-size:14px;margin:0}
+.empty{padding:28px 6px;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-family:var(--display);font-weight:400;letter-spacing:.05em;margin-bottom:4px}
+.contact{font-family:var(--mono);font-size:14px;user-select:text;-webkit-user-select:text}
+.chat{display:flex;flex-direction:column;gap:14px}
+.msg{max-width:85%;padding:12px 16px;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text;-webkit-user-select:text}
+.msg.me{align-self:flex-end;background:var(--brass-soft)}
+.msg.in{align-self:flex-start;background:var(--brass-soft)}
+.msg.j{align-self:flex-start;border:1px solid var(--line)}
+.msg.j::before{content:"JARVIS";display:block;font-family:var(--display);font-size:11px;letter-spacing:.3em;color:var(--brass);margin-bottom:4px}
+.suggest{display:flex;flex-wrap:wrap;gap:8px}
+.suggest button{border:1px solid var(--line);background:none;padding:9px 13px;cursor:pointer;font-size:14px;color:var(--muted);text-align:left;min-height:44px}
+.suggest button:hover{border-color:var(--brass);color:var(--ink)}
+/* Oggi */
+.hero{position:relative;overflow:hidden;min-height:clamp(240px,40vw,420px);display:flex;align-items:flex-end;isolation:isolate}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(10,13,9,.15) 0%,rgba(10,13,9,.35) 45%,var(--bg) 100%)}
+.hero-in{padding:28px clamp(16px,4vw,40px);display:flex;flex-direction:column;gap:10px;max-width:760px}
+.hero-in .eyebrow{color:var(--ink)}
+.date{font-family:var(--display);font-weight:400;font-size:clamp(30px,5.5vw,60px);letter-spacing:.08em;line-height:1.05;margin:0;color:#f4efe4;text-shadow:0 2px 30px rgba(0,0,0,.35)}
+@media (prefers-reduced-motion:no-preference){.hero img{animation:kb 22s ease-out both}@keyframes kb{from{transform:scale(1.1)}to{transform:scale(1.01)}}}
+.today{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:820px){.today{grid-template-columns:minmax(0,1fr)}}
+ol.three{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;counter-reset:p}
+ol.three li{counter-increment:p;display:grid;grid-template-columns:48px minmax(0,1fr);gap:14px;padding:16px 0;border-top:1px solid var(--line);font-size:18px}
+ol.three li::before{content:counter(p,upper-roman);font-family:var(--display);font-size:22px;color:var(--brass);line-height:1.3}
+ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.tile{background:var(--panel);border:0;padding:16px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-height:44px}
+.tile:hover{background:var(--brass-soft)}
+.tile b{font-family:var(--display);font-size:34px;font-weight:400;color:var(--ink);line-height:1.1}
+.tile span{font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.tile.att b{color:var(--warn)}
+/* Collezione */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{position:relative;border:0;background:var(--panel);padding:0;overflow:hidden;cursor:pointer;text-align:left;display:block;aspect-ratio:4/5;width:100%;isolation:isolate}
+.card .ph{position:absolute;inset:0;z-index:-2;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:22px;letter-spacing:.2em;color:var(--brass)}
+.card .ph img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .8s ease}
+.card:hover .ph img{transform:scale(1.04)}
+.card::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,transparent 45%,rgba(10,13,9,.88) 100%)}
+.card .ct{position:absolute;left:0;right:0;bottom:0;padding:16px;display:flex;flex-direction:column;gap:4px}
+.card .ct b{font-family:var(--display);font-weight:400;font-size:20px;letter-spacing:.14em;color:#f4efe4}
+.card .ct span{font-size:13px;opacity:.85}
+.card .ct span.k{font-size:11px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:var(--brass);opacity:1}
+.stage{position:relative;width:100%;aspect-ratio:4/3;background:var(--panel);overflow:hidden;touch-action:none}
+.stage canvas{display:block;width:100%;height:100%}
+.stage .hint{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--muted);pointer-events:none;margin:0}
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.gallery img,.cover{width:100%;display:block}
+/* Accesso */
+.login{max-width:440px;margin:12vh auto 0;display:flex;flex-direction:column;gap:18px}
+.login h1{font-family:var(--display);font-weight:400;letter-spacing:.32em;font-size:34px;margin:0}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- ACCESSO -->
+<div class="login" id="login" hidden>
+  <h1>JARVIS</h1>
+  <p class="eyebrow">Bonomelli Estate · Studio</p>
+  <div class="frieze" aria-hidden="true"></div>
+  <form class="panel" id="login-form">
+    <label class="f">Email<input type="email" id="l-email" value="studio@bonomelliestate.it" autocomplete="username" required></label>
+    <label class="f">Password<input type="password" id="l-pass" autocomplete="current-password" required></label>
+    <button class="btn" type="submit" id="l-go">Entra</button>
+    <p class="err" id="l-err" hidden></p>
+    <p class="note">Solo Brenda può entrare. La password la sceglie lei e resta salvata su questo iPad.</p>
+  </form>
+</div>
+
+<div class="app" id="app" hidden>
+  <header class="top">
+    <div class="brand"><h1>JARVIS</h1><p>Bonomelli Estate · Studio</p></div>
+    <div class="status" aria-live="polite">
+      <span class="chip" id="st"><i></i>In collegamento…</span>
+      <button class="btn ghost" id="refresh" type="button">↻ Aggiorna</button>
+      <button class="btn ghost" id="logout" type="button">Esci</button>
+    </div>
+  </header>
+
+  <div class="frieze" aria-hidden="true"></div>
+  <nav class="tabs" role="tablist" aria-label="Sezioni">
+    <button role="tab" id="tab-oggi" aria-selected="true" aria-controls="p-oggi">Oggi</button>
+    <button role="tab" id="tab-cli" aria-selected="false" aria-controls="p-cli">Clienti<span class="count" id="cnt-cli"></span></button>
+    <button role="tab" id="tab-scr" aria-selected="false" aria-controls="p-scr">Scrivi</button>
+    <button role="tab" id="tab-col" aria-selected="false" aria-controls="p-col">Collezione</button>
+    <button role="tab" id="tab-ric" aria-selected="false" aria-controls="p-ric">Richieste<span class="count" id="cnt-ric"></span></button>
+    <button role="tab" id="tab-soc" aria-selected="false" aria-controls="p-soc">Social<span class="count" id="cnt-soc"></span></button>
+    <button role="tab" id="tab-ask" aria-selected="false" aria-controls="p-ask">Chiedi</button>
+  </nav>
+
+  <!-- OGGI -->
+  <section id="p-oggi" role="tabpanel" aria-labelledby="tab-oggi">
+    <div class="hero">
+      <img src="../img/glicine-alto.webp" alt="La Serra dei Sogni, galleria vetrata a glicine">
+      <div class="hero-in"><p class="eyebrow" id="o-eyebrow">Oggi</p><h2 class="date" id="o-date">Buongiorno Brenda</h2></div>
+    </div>
+    <div class="today">
+      <div class="panel">
+        <div id="o-prio"><div class="empty"><strong>Le 3 cose di oggi arrivano qui</strong>Ogni mattina alle 7:52 JARVIS le scrive dopo aver letto le note e i clienti.</div></div>
+        <div id="o-brief"></div>
+      </div>
+      <div class="panel">
+        <p class="eyebrow">A colpo d'occhio</p>
+        <div class="tiles">
+          <button class="tile" data-go="tab-cli" type="button"><b id="n-cli">–</b><span>clienti da contattare</span></button>
+          <button class="tile" data-go="tab-ric" id="t-app" type="button"><b id="n-app">–</b><span>da approvare</span></button>
+          <button class="tile" data-go="tab-cli" type="button"><b id="n-risp">–</b><span>hanno risposto</span></button>
+          <button class="tile" data-go="tab-col" type="button"><b id="n-col">–</b><span>concept in collezione</span></button>
+        </div>
+        <p class="note" id="o-upd"></p>
+        <div class="jbox">
+          <p class="eyebrow">JARVIS sull'iPad</p>
+          <p class="note">In Safari tocca Condividi e poi “Aggiungi alla schermata Home”. L'app è tua: funziona senza Claude e senza consumare nulla.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIENTI -->
+  <section id="p-cli" role="tabpanel" aria-labelledby="tab-cli" hidden>
+    <div class="split">
+      <div>
+        <div class="filters" role="group" aria-label="Filtra clienti">
+          <button data-cf="da_contattare" aria-pressed="true">Da contattare</button>
+          <button data-cf="in_corso" aria-pressed="false">In corso</button>
+          <button data-cf="tutti" aria-pressed="false">Tutti</button>
+        </div>
+        <div class="list" id="cli-list"><div class="empty"><strong>Carico i clienti…</strong></div></div>
+      </div>
+      <div class="panel" id="cli-detail">
+        <p class="eyebrow">Come funziona</p>
+        <h2>Ogni mattina nuovi clienti veri</h2>
+        <p>Il Cacciatore cerca ville, hotel e tenute con un progetto in corso. Per ognuno trovi il motivo, la fonte e l'email già scritta come la tua email tipo. La copi, la invii tu da studio@bonomelliestate.it e segni qui cosa è successo.</p>
+        <p class="note">Classe A: cercano già un designer. Classe B: progetto in corso. Classe C: luogo adatto.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCRIVI: email tipo e risposte pronte, senza IA -->
+  <section id="p-scr" role="tabpanel" aria-labelledby="tab-scr" hidden>
+    <div class="panel">
+      <p class="eyebrow">Email tipo approvata · nessuna IA, nessun costo</p>
+      <h2>Scrivi un primo contatto</h2>
+      <div class="form">
+        <label class="f">Parti da un cliente della lista<select id="e-cli"><option value="">— nessuno, scrivo io —</option></select></label>
+        <label class="f">Lingua<select id="e-lang"><option value="it">Italiano</option><option value="en">English</option></select></label>
+        <label class="f">Destinatario (dopo “Gentile”)<input type="text" id="e-nome" placeholder="Villa Quaranta Tommasi"></label>
+        <label class="f">Luogo, per l'oggetto<input type="text" id="e-luogo" placeholder="Villa Quaranta"></label>
+        <label class="f wide">Una frase sul loro luogo<textarea id="e-frase" style="min-height:80px" placeholder="il parco romantico della Tenuta, con il suo lago e l'isola, è uno degli scenari più rari della Valpolicella per un matrimonio."></textarea></label>
+        <label class="f">Il concept da proporre<select id="e-concept"></select></label>
+        <label class="f wide">Perché quel concept (modificabile)<textarea id="e-perche" style="min-height:70px"></textarea></label>
+      </div>
+      <div class="jbox">
+        <p class="note">Oggetto: <span class="contact" id="e-ogg"></span></p>
+        <label class="f">Email pronta (modificabile)<textarea id="e-out" style="min-height:300px"></textarea></label>
+        <div class="btnrow">
+          <button class="btn" id="e-copy" type="button">Copia l'email</button>
+          <button class="btn ghost" id="e-copy-ogg" type="button">Copia l'oggetto</button>
+          <a class="btn ghost" id="e-mail" href="#">Apri nell'email</a>
+        </div>
+        <p class="note">Invia sempre da studio@bonomelliestate.it, senza allegati: il link al concept basta.</p>
+      </div>
+    </div>
+    <div class="panel" style="margin-top:22px">
+      <p class="eyebrow">Risposte pronte</p>
+      <h2>Quando un cliente ti risponde</h2>
+      <div class="form">
+        <label class="f">Situazione<select id="r-tipo"></select></label>
+        <label class="f">Lingua<select id="r-lang"><option value="it">Italiano</option><option value="en">English</option></select></label>
+        <label class="f">Nome del cliente<input type="text" id="r-nome" placeholder="Dott.ssa Rossi"></label>
+      </div>
+      <textarea id="r-out" style="min-height:220px"></textarea>
+      <div class="btnrow"><button class="btn" id="r-copy" type="button">Copia la risposta</button></div>
+    </div>
+  </section>
+
+  <!-- COLLEZIONE -->
+  <section id="p-col" role="tabpanel" aria-labelledby="tab-col" hidden>
+    <div id="col-grid" class="grid"><div class="empty"><strong>Carico la collezione…</strong></div></div>
+    <div class="panel" id="col-detail" hidden></div>
+  </section>
+
+  <!-- RICHIESTE DAL SITO -->
+  <section id="p-ric" role="tabpanel" aria-labelledby="tab-ric" hidden>
+    <div class="split">
+      <div>
+        <div class="filters" role="group" aria-label="Filtra richieste">
+          <button data-f="approva" aria-pressed="false" id="f-approva">Da approvare</button>
+          <button data-f="nuova" aria-pressed="false">Nuove</button>
+          <button data-f="in_corso" aria-pressed="false">In corso</button>
+          <button data-f="chiusa" aria-pressed="false">Chiuse</button>
+          <button data-f="tutte" aria-pressed="true">Tutte</button>
+        </div>
+        <div class="list" id="ric-list"><div class="empty"><strong>Carico le richieste…</strong></div></div>
+      </div>
+      <div class="panel" id="ric-detail">
+        <p class="eyebrow">Come funziona</p>
+        <h2>Le richieste dal sito</h2>
+        <p>Quando un cliente compila il modulo su bonomelliestate.com, la richiesta arriva qui. Le risposte delicate aspettano il tuo sì nella lista “Da approvare”.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL -->
+  <section id="p-soc" role="tabpanel" aria-labelledby="tab-soc" hidden>
+    <div class="split">
+      <div><div class="list" id="soc-list"><div class="empty"><strong>Carico le conversazioni…</strong></div></div></div>
+      <div class="panel" id="soc-detail">
+        <p class="eyebrow">WhatsApp · Instagram · Facebook</p>
+        <h2>Le chat dei clienti</h2>
+        <p>Le risposte che aspettano il tuo sì sono segnate “da approvare”.</p>
+        <p class="note">Su WhatsApp si può rispondere solo entro 24 ore dall'ultimo messaggio del cliente.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHIEDI -->
+  <section id="p-ask" role="tabpanel" aria-labelledby="tab-ask" hidden>
+    <div class="panel">
+      <p class="eyebrow">Gratis · risponde subito</p>
+      <h2>Chiedi a JARVIS</h2>
+      <div class="suggest" id="suggest">
+        <button data-q="adesso">Cosa faccio adesso?</button>
+        <button data-q="risposte">Chi mi ha risposto?</button>
+        <button data-q="attesa">Chi aspetta una mia risposta da più di 10 giorni?</button>
+        <button data-q="prezzo">Come rispondo a chi chiede subito il prezzo?</button>
+      </div>
+      <div class="chat" id="chat" aria-live="polite"></div>
+      <div class="jbox">
+        <p class="eyebrow">Per un testo nuovo o un'idea</p>
+        <p class="note">Scrivi la domanda: JARVIS prepara il messaggio con le tue priorità e i clienti e apre Claude. Usa il tuo piano Claude, non costa nulla in più.</p>
+        <textarea id="c-in" style="min-height:90px" placeholder="Scrivi un post Instagram su LABYRINTHUS, in italiano e inglese"></textarea>
+        <div class="btnrow"><button class="btn" id="c-claude" type="button">Apri in Claude</button><button class="btn ghost" id="c-clear" type="button">Pulisci</button></div>
+        <p class="note" id="c-note" hidden>Ho copiato la domanda: se Claude si apre vuoto, incollala.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const URL_DB="https://klxcmojwmjilklfoqzhp.supabase.co";
+const KEY="sb_publishable_ft-DNpTfQMfHfw08NEvsPg_nIsqkiHR"; // chiave pubblica: i dati restano protetti dalle regole del database
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl=u=>/^https:\/\//i.test(String(u||""))?String(u):"";
+const fmtDate=iso=>{const d=new Date(iso);return isNaN(d)?"":d.toLocaleString("it-IT",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});};
+const days=iso=>{const d=new Date(iso);return isNaN(d)?0:Math.floor((Date.now()-d)/864e5);};
+const CST={da_contattare:"Da contattare",inviato:"Email inviata",risposta:"Ha risposto",trattativa:"In trattativa",chiuso:"Chiuso"};
+const JLBL={in_lavorazione:"in preparazione",inviata:"risposta inviata",da_approvare:"da approvare",approvata:"in invio",scartata:"scartata",errore:"errore"};
+const LBL={tipo:{consulenza:"Consulenza privata",dossier:"Dossier riservato",collaborazione:"Collaborazione",altro:"Altro"},
+  profilo:{privato:"Privato",architetto:"Architetto o designer",broker:"Broker o agente",hotel:"Hotel o resort",azienda:"Azienda",altro:"Altro"},
+  stato:{nuova:"Nuova",in_corso:"In corso",chiusa:"Chiusa"}};
+const CAN={whatsapp:"WhatsApp",instagram:"Instagram",facebook:"Facebook"};
+function chip(cls,text){const el=$("st");el.className="chip "+cls;el.innerHTML="<i></i>"+esc(text);}
+async function copyText(text,btn){
+  try{await navigator.clipboard.writeText(text);const o=btn.textContent;btn.textContent="Copiato";setTimeout(()=>btn.textContent=o,1500);return true;}
+  catch(e){btn.textContent="Seleziona il testo e copia";return false;}}
+
+if(!window.supabase){document.body.innerHTML='<div class="login"><h1>JARVIS</h1><p class="err">Serve la connessione a internet per aprire JARVIS. Riprova tra poco.</p></div>';return;}
+const sb=window.supabase.createClient(URL_DB,KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:"jarvis-bonomelli"}});
+
+/* ---------- accesso ---------- */
+async function start(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(session){$("login").hidden=true;$("app").hidden=false;loadAll();}
+  else{$("app").hidden=true;$("login").hidden=false;}
+}
+$("login-form").addEventListener("submit",async e=>{
+  e.preventDefault();const er=$("l-err");er.hidden=true;$("l-go").disabled=true;
+  const {error}=await sb.auth.signInWithPassword({email:$("l-email").value.trim(),password:$("l-pass").value});
+  $("l-go").disabled=false;
+  if(error){er.textContent=/invalid/i.test(error.message)?"Email o password non corrette.":"Non riesco a entrare: "+error.message;er.hidden=false;return;}
+  $("l-pass").value="";start();
+});
+$("logout").addEventListener("click",async()=>{await sb.auth.signOut();start();});
+sb.auth.onAuthStateChange(ev=>{if(ev==="SIGNED_OUT")start();});
+
+/* ---------- schede ---------- */
+const TABS=["oggi","cli","scr","col","ric","soc","ask"];
+function openTab(t){TABS.forEach(x=>{$("tab-"+x).setAttribute("aria-selected",x===t?"true":"false");$("p-"+x).hidden=x!==t;});try{localStorage.setItem("jv-tab",t)}catch(e){}}
+TABS.forEach(t=>$("tab-"+t).addEventListener("click",()=>openTab(t)));
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>openTab(b.dataset.go.slice(4))));
+try{const h=location.hash.slice(1);const t=TABS.includes(h)?h:localStorage.getItem("jv-tab");if(TABS.includes(t))openTab(t);}catch(e){}
+
+/* ---------- dati ---------- */
+let oggi=null,clienti=[],collezione=[],ric=[],soc=[];
+async function loadAll(){
+  chip("","Aggiorno…");
+  const [b,c,k,r,j,m]=await Promise.all([
+    sb.from("app_bacheca").select("contenuto,aggiornato_at").eq("chiave","oggi").maybeSingle(),
+    sb.from("app_clienti").select("*").order("data",{ascending:false}),
+    sb.from("app_collezione").select("*").order("ordine"),
+    sb.from("richieste").select("id,created_at,nome,email,telefono,paese,profilo,tipo,progetto,messaggio,canale_preferito,fonte,lingua,stato").order("created_at",{ascending:false}).limit(300),
+    sb.from("jarvis_risposte").select("id,richiesta_id,stato,oggetto,testo,riassunto,motivo,errore,inviata_at").eq("canale","email"),
+    sb.from("jarvis_messaggi").select("id,created_at,canale,contatto_id,contatto_nome,direzione,testo,stato,motivo,errore").order("created_at",{ascending:false}).limit(500)
+  ]);
+  const errs=[b,c,k,r,j,m].filter(x=>x.error);
+  if(errs.length){
+    const msg=errs[0].error.message||"";
+    if(/JWT|expired|auth/i.test(msg)){await sb.auth.signOut();return;}
+    chip("bad","Alcuni dati non raggiungibili");
+  }else chip("ok","Collegato · "+new Date().toLocaleTimeString("it-IT",{hour:"2-digit",minute:"2-digit"}));
+  oggi=b.data?b.data.contenuto:null;
+  clienti=c.data||[];collezione=k.data||[];
+  const js=new Map((j.data||[]).map(x=>[x.richiesta_id,x]));
+  ric=(r.data||[]).map(x=>({...x,j:js.get(x.id)||null}));
+  soc=m.data||[];
+  renderOggi();renderClienti();renderCol();renderRic();renderSoc();renderTiles();fillEmailClients();
+  if(!c.data?.length&&!k.data?.length&&!errs.length)chip("bad","Nessun dato: l'accesso non è ancora attivo");
+}
+$("refresh").addEventListener("click",loadAll);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!$("app").hidden)loadAll();});
+
+/* ---------- oggi ---------- */
+function renderOggi(){
+  if(!oggi)return;
+  $("o-eyebrow").textContent=oggi.data?("Oggi · "+oggi.data):"Oggi";
+  $("o-date").textContent=oggi.saluto||"Buongiorno Brenda";
+  const p=Array.isArray(oggi.priorita)?oggi.priorita:[];
+  $("o-prio").innerHTML=p.length?`<p class="eyebrow">Le 3 cose più importanti</p><ol class="three">${p.slice(0,3).map(x=>`<li><span>${esc(x)}</span></li>`).join("")}</ol>`:"";
+  const b=Array.isArray(oggi.inBreve)?oggi.inBreve:[];
+  $("o-brief").innerHTML=b.length?`<p class="eyebrow">In breve</p><ul class="plain">${b.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:"";
+  $("o-upd").textContent=oggi.aggiornato?("Aggiornato da JARVIS: "+fmtDate(oggi.aggiornato)):"";
+}
+function nApprova(){return ric.filter(r=>r.j&&r.j.stato==="da_approvare").length+soc.filter(m=>m.direzione==="out"&&m.stato==="da_approvare").length;}
+function renderTiles(){
+  const nc=clienti.filter(c=>(c.stato||"da_contattare")==="da_contattare").length;
+  $("n-cli").textContent=nc;$("cnt-cli").textContent=nc||"";
+  $("n-risp").textContent=clienti.filter(c=>["risposta","trattativa"].includes(c.stato)).length;
+  $("n-col").textContent=collezione.length;
+  const na=nApprova();$("n-app").textContent=na;$("t-app").classList.toggle("att",na>0);
+  const nr=ric.filter(r=>r.j&&r.j.stato==="da_approvare").length;$("cnt-ric").textContent=nr||"";$("f-approva").textContent=nr?`Da approvare (${nr})`:"Da approvare";
+  const ns=soc.filter(m=>m.direzione==="out"&&m.stato==="da_approvare").length;$("cnt-soc").textContent=ns||"";
+}
+
+/* ---------- clienti ---------- */
+let cFilter="da_contattare",cCur=null;
+function renderClienti(){
+  const inCorso=["inviato","risposta","trattativa"];
+  const L=clienti.filter(c=>{const s=c.stato||"da_contattare";return cFilter==="tutti"||(cFilter==="in_corso"?inCorso.includes(s):s===cFilter);})
+    .sort((a,b)=>String(a.classe||"C").localeCompare(String(b.classe||"C"))||String(b.data||"").localeCompare(String(a.data||"")));
+  if(!L.length){$("cli-list").innerHTML=`<div class="empty"><strong>${clienti.length?"Nessun cliente in questa lista":"Ancora nessun cliente"}</strong>${clienti.length?"Prova un altro filtro.":"Il Cacciatore li aggiunge ogni mattina, dal lunedì al sabato."}</div>`;return;}
+  $("cli-list").innerHTML=L.map(c=>`<button class="row" data-id="${esc(c.slug)}" aria-current="${cCur===c.slug}">
+    <span class="n">${esc(c.nome)}</span><span class="d">${esc(c.data||"")}</span>
+    <span class="s"><span class="pill cl-${esc(c.classe||"C")}">Classe ${esc(c.classe||"C")}</span> <span class="pill st-${esc(c.stato||"da_contattare")}">${esc(CST[c.stato||"da_contattare"]||c.stato)}</span> ${esc(c.luogo||"")}</span></button>`).join("");
+  $("cli-list").querySelectorAll(".row").forEach(b=>b.addEventListener("click",()=>{cCur=b.dataset.id;renderClienti();
+    if(matchMedia("(max-width:820px)").matches)$("cli-detail").scrollIntoView({behavior:"smooth",block:"start"});}));
+  if(cCur)renderCliDetail();
+}
+document.querySelectorAll("[data-cf]").forEach(b=>b.addEventListener("click",()=>{cFilter=b.dataset.cf;
+  document.querySelectorAll("[data-cf]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));renderClienti();}));
+function renderCliDetail(){
+  const c=clienti.find(x=>x.slug===cCur);if(!c)return;const link=safeUrl(c.link);const st=c.stato||"da_contattare";
+  const mail=c.oggetto?`mailto:?subject=${encodeURIComponent(c.oggetto)}&body=${encodeURIComponent(c.messaggio||"")}`:"";
+  $("cli-detail").innerHTML=`<p class="eyebrow">Classe ${esc(c.classe||"C")} · confidenza ${esc(c.confidenza||"–")} · trovato il ${esc(c.data||"")}</p>
+    <h2>${esc(c.nome)}</h2>
+    <dl class="facts">
+      ${c.luogo?`<div><dt>Dove</dt><dd>${esc(c.luogo)}</dd></div>`:""}
+      <div><dt>Chi contattare</dt><dd>${esc(c.chi||"da cercare")}</dd></div>
+      <div><dt>Stato</dt><dd>${esc(CST[st]||st)}${c.aggiornato_at&&st!=="da_contattare"?" · "+esc(fmtDate(c.aggiornato_at)):""}</dd></div>
+    </dl>
+    ${c.perche?`<div><p class="eyebrow">Perché è adatto</p><p>${esc(c.perche)}</p></div>`:""}
+    ${c.gancio?`<div><p class="eyebrow">Il gancio</p><p>${esc(c.gancio)}${link?` · <a href="${esc(link)}" target="_blank" rel="noopener">fonte</a>`:""}</p></div>`:""}
+    ${c.messaggio?`<div class="jbox"><p class="eyebrow">${c.oggetto?"Email pronta":"Messaggio pronto"}${c.lingua&&c.lingua!=="it"?" ("+esc(c.lingua)+")":""}</p>
+      ${c.oggetto?`<p class="note">Oggetto: <span class="contact">${esc(c.oggetto)}</span></p>`:""}
+      ${c.canale?`<p class="note">Dove inviarla: ${esc(c.canale)}</p>`:""}
+      <blockquote>${esc(c.messaggio)}</blockquote>
+      ${c.traduzione?`<p class="note">In italiano: ${esc(c.traduzione)}</p>`:""}
+      <div class="btnrow"><button class="btn" id="cl-copy" type="button">Copia il testo</button>${mail?`<a class="btn ghost" href="${esc(mail)}">Apri nell'email</a>`:""}<button class="btn ghost" id="cl-edit" type="button">Modifica in Scrivi</button></div></div>`:""}
+    <div><p class="eyebrow">Cosa è successo</p><div class="btnrow">${Object.keys(CST).map(s=>`<button class="btn ghost" data-cs="${s}" type="button" ${st===s?'aria-pressed="true" disabled':""}>${CST[s]}</button>`).join("")}</div>
+    <p class="note">Segna “Email inviata” solo dopo averla inviata tu. JARVIS non invia niente.</p><p class="err" id="cl-err" hidden></p></div>`;
+  const cp=$("cl-copy");if(cp)cp.addEventListener("click",e=>copyText(c.messaggio,e.currentTarget));
+  const ed=$("cl-edit");if(ed)ed.addEventListener("click",()=>{$("e-cli").value=c.slug;fromClient();openTab("scr");});
+  $("cli-detail").querySelectorAll("[data-cs]").forEach(b=>b.addEventListener("click",async()=>{
+    b.disabled=true;const {error}=await sb.from("app_clienti").update({stato:b.dataset.cs,aggiornato_at:new Date().toISOString()}).eq("slug",c.slug);
+    if(error){const er=$("cl-err");er.textContent="Non sono riuscito a salvare. Riprova.";er.hidden=false;b.disabled=false;return;}
+    c.stato=b.dataset.cs;c.aggiornato_at=new Date().toISOString();renderClienti();renderTiles();}));
+}
+
+/* ---------- scrivi: email tipo ---------- */
+const FRASI={
+  "pav-rome":{it:"un tempietto con colonne binate che si specchia nell'acqua, pensato per cerimonie e momenti raccolti.",en:"a circular temple with paired columns reflected in the water, designed for ceremonies and quiet moments."},
+  "pav-caelo":{it:"tre cupole di vetro nel parco, pensate per ricevimenti e cene private sotto il cielo.",en:"three glass domes in the park, designed for receptions and private dinners beneath the sky."},
+  "pav-dhier":{it:"una rotonda ionica vetrata con cupola in ardesia, tra le siepi del giardino.",en:"a glazed Ionic rotunda with a slate dome, set among the garden hedges."},
+  "pav-airfrais":{it:"una rotonda colonnata con cupola e lanterna, tra ortensie e lavanda.",en:"a colonnaded rotunda with dome and lantern, among hydrangeas and lavender."},
+  "pav-bonomelli":{it:"un padiglione su due piani ottagonali, con biblioteca e scala a chiocciola in ferro battuto.",en:"a pavilion on two octagonal floors, with a library and a wrought-iron spiral staircase."},
+  "pav-magnolia":{it:"un emiciclo a tre cupole sul parterre, per orangerie e ricevimenti.",en:"a three-domed hemicycle on the parterre, for an orangery and receptions."},
+  "pav-forestier":{it:"un padiglione nel bosco, con lampadari e una vasca di ninfee.",en:"a woodland pavilion with chandeliers and a water-lily pool."},
+  "serra-dei-sogni":{it:"gallerie vetrate ad archi in ferro brunito, con vetrate decorate a fiori.",en:"arched glass galleries in burnished iron, with flower-patterned glazing."},
+  "labyrinthus":{it:"un labirinto di siepi con un tempietto neoclassico al centro, raggiunto passo dopo passo.",en:"a hedge labyrinth with a neoclassical temple at its heart, reached step by step."}
+};
+const FIRMA="Brenda Bonomelli · Visual Concept Designer · Bonomelli Estate · studio@bonomelliestate.it · bonomelliestate.com";
+function buildEmail(){
+  const lang=$("e-lang").value,nome=$("e-nome").value.trim()||"[Nome]",luogo=$("e-luogo").value.trim()||"[luogo]";
+  const frase=$("e-frase").value.trim()||"[una frase sul loro luogo]";
+  const k=collezione.find(x=>x.slug===$("e-concept").value);const conc=k?k.nome:"[CONCEPT]";const link=k&&safeUrl(k.pagina)?k.pagina:"";
+  const perche=$("e-perche").value.trim();
+  let ogg,t;
+  if(lang==="en"){
+    ogg="A concept for "+luogo;
+    t=`Dear ${nome},\n${frase}\nI am Brenda Bonomelli of Bonomelli Estate.\nVisual Concept Designer: I design and develop neoclassical pavilions reimagined for 2026, in stone and glass, by private commission.\nFor a place like yours I have in mind ${conc}: ${perche}\n${link?link+"\n":""}Should you wish to know more, simply reply and I will send you the private dossier.\nIf you would rather not receive further messages, please just let me know.\nKind regards,\n${FIRMA}`;
+  }else{
+    ogg="Un concept per "+luogo;
+    const art=/^[AEIOU]/i.test(conc)?"ad":"a";
+    t=`Gentile ${nome},\n${frase}\nSono Brenda Bonomelli della Bonomelli Estate.\nVisual Concept Designer : disegno e sviluppo padiglioni neoclassici rivisitati in chiave 2026 , in pietra e vetro su commissione privata.\nPer un luogo come il vostro penso ${art} ${conc}: ${perche}\n${link?link+"\n":""}Qualora desiderasse approfondire, mi risponda e le invierò il dossier riservato.\nNel caso preferisse non ricevere altre comunicazioni, me lo dica pure.\nUn cordiale saluto,\n${FIRMA}`;
+  }
+  $("e-ogg").textContent=ogg;$("e-out").value=t;updMail();
+}
+function updMail(){$("e-mail").href=`mailto:?subject=${encodeURIComponent($("e-ogg").textContent)}&body=${encodeURIComponent($("e-out").value)}`;}
+function setPerche(){const f=FRASI[$("e-concept").value];$("e-perche").value=f?f[$("e-lang").value]:"";buildEmail();}
+function fillEmailClients(){
+  const cur=$("e-cli").value;
+  $("e-cli").innerHTML=`<option value="">— nessuno, scrivo io —</option>`+clienti.map(c=>`<option value="${esc(c.slug)}">${esc(c.nome)}</option>`).join("");
+  $("e-cli").value=cur;
+  const cc=$("e-concept").value;
+  $("e-concept").innerHTML=collezione.filter(x=>FRASI[x.slug]).map(x=>`<option value="${esc(x.slug)}">${esc(x.nome)}</option>`).join("");
+  if(cc)$("e-concept").value=cc;else{$("e-concept").value="pav-rome";}
+  if(!$("e-perche").value)setPerche();else buildEmail();
+}
+function fromClient(){
+  const c=clienti.find(x=>x.slug===$("e-cli").value);if(!c)return;
+  $("e-nome").value=c.nome;$("e-luogo").value=(c.oggetto||"").replace(/^Un concept per\s*/i,"")||c.nome;
+  if(c.lingua==="en")$("e-lang").value="en";
+  if(c.messaggio&&c.oggetto){$("e-ogg").textContent=c.oggetto;$("e-out").value=c.messaggio;updMail();}else buildEmail();
+}
+$("e-cli").addEventListener("change",fromClient);
+["e-nome","e-luogo","e-frase","e-perche"].forEach(id=>$(id).addEventListener("input",buildEmail));
+$("e-concept").addEventListener("change",setPerche);$("e-lang").addEventListener("change",setPerche);
+$("e-out").addEventListener("input",updMail);
+$("e-copy").addEventListener("click",e=>copyText($("e-out").value,e.currentTarget));
+$("e-copy-ogg").addEventListener("click",e=>copyText($("e-ogg").textContent,e.currentTarget));
+
+/* ---------- scrivi: risposte pronte ---------- */
+const RISP={
+  prezzo:{l:"Chiede subito il prezzo",
+    it:n=>`Gentile ${n},\nla ringrazio per l'interesse.\nOgni padiglione nasce su commissione e su misura: il prezzo si definisce con un preventivo dettagliato, dopo il concept pensato per il suo luogo.\nPer prepararlo mi servono poche informazioni: dove si trova, le dimensioni dello spazio, l'uso che immagina e i tempi.\nSe preferisce, possiamo sentirci per una breve chiamata.\nUn cordiale saluto,\n${FIRMA}`,
+    en:n=>`Dear ${n},\nthank you for your interest.\nEach pavilion is made by private commission and to measure: the price is defined in a detailed quotation, after a concept designed for your setting.\nTo prepare it I only need a few details: the location, the size of the space, the use you have in mind and your timing.\nIf you prefer, we could arrange a short call.\nKind regards,\n${FIRMA}`},
+  dossier:{l:"Vuole il dossier",
+    it:n=>`Gentile ${n},\ncon piacere. Le invio il dossier riservato con schede, misure e varianti.\nLe chiedo cortesemente di considerarlo personale: i concept sono opere originali dello studio.\nResto a disposizione per qualsiasi domanda o per una breve chiamata.\nUn cordiale saluto,\n${FIRMA}`,
+    en:n=>`Dear ${n},\nwith pleasure. Please find the private dossier with drawings, dimensions and variants.\nI kindly ask you to keep it personal: the concepts are original works of the studio.\nI remain at your disposal for any question or a short call.\nKind regards,\n${FIRMA}`},
+  ricontatto:{l:"Nessuna risposta dopo 10 giorni",
+    it:n=>`Gentile ${n},\nle riscrivo brevemente in merito al concept che le avevo proposto.\nSe il momento non è quello giusto, nessun problema: mi basta saperlo.\nSe invece desidera approfondire, le invio volentieri il dossier riservato.\nUn cordiale saluto,\n${FIRMA}`,
+    en:n=>`Dear ${n},\nI am writing briefly about the concept I shared with you.\nIf this is not the right moment, that is perfectly fine: just let me know.\nShould you wish to know more, I would be glad to send the private dossier.\nKind regards,\n${FIRMA}`},
+  grazie:{l:"Dopo una chiamata",
+    it:n=>`Gentile ${n},\ngrazie per il tempo che mi ha dedicato.\nCome concordato, preparo il concept per il suo luogo e glielo invio entro [data].\nSe nel frattempo le vengono in mente altri dettagli, mi scriva pure.\nUn cordiale saluto,\n${FIRMA}`,
+    en:n=>`Dear ${n},\nthank you for your time today.\nAs agreed, I will prepare the concept for your setting and send it to you by [date].\nShould any other detail come to mind in the meantime, please write to me.\nKind regards,\n${FIRMA}`}
+};
+$("r-tipo").innerHTML=Object.entries(RISP).map(([k,v])=>`<option value="${k}">${esc(v.l)}</option>`).join("");
+function buildRisp(){const r=RISP[$("r-tipo").value];const n=$("r-nome").value.trim()||"[Nome]";$("r-out").value=r[$("r-lang").value](n);}
+["r-tipo","r-lang"].forEach(id=>$(id).addEventListener("change",buildRisp));$("r-nome").addEventListener("input",buildRisp);buildRisp();
+$("r-copy").addEventListener("click",e=>copyText($("r-out").value,e.currentTarget));
+
+/* ---------- collezione ---------- */
+let colCur=null;
+function renderCol(){
+  if(!collezione.length){$("col-grid").innerHTML=`<div class="empty"><strong>La collezione arriva qui</strong></div>`;return;}
+  $("col-grid").innerHTML=collezione.map(p=>`<button class="card" data-id="${esc(p.slug)}" type="button">
+    <div class="ph">${p.immagine?`<img src="${esc(p.immagine)}" alt="${esc(p.nome)}" loading="lazy">`:esc(p.nome)}</div>
+    <div class="ct"><span class="k">${esc(p.stato||"")}${p.modello?" · 3D":""}</span><b>${esc(p.nome)}</b><span>${esc(p.cosa||"")}</span></div></button>`).join("");
+  $("col-grid").querySelectorAll(".card").forEach(b=>b.addEventListener("click",()=>{colCur=b.dataset.id;renderColDetail();}));
+}
+function renderColDetail(){
+  const p=collezione.find(x=>x.slug===colCur);if(!p)return;const d=$("col-detail");d.hidden=false;
+  const imgs=Array.isArray(p.galleria)?p.galleria:[];const pg=safeUrl(p.pagina);
+  d.innerHTML=`<div class="btnrow"><button class="btn ghost" id="col-back" type="button">← Tutta la collezione</button>${pg?`<a class="btn ghost" href="${esc(pg)}" target="_blank" rel="noopener">Pagina sul sito</a><button class="btn ghost" id="col-link" type="button">Copia il link</button>`:""}${FRASI[p.slug]?`<button class="btn" id="col-mail" type="button">Proponilo in un'email</button>`:""}</div>
+    <p class="eyebrow">${esc(p.stato||"Concept")}</p><h2>${esc(p.nome)}</h2>
+    ${p.modello?`<div class="stage" id="stage"><p class="hint">Trascina per girare · due dita per avvicinare</p></div>`:(p.immagine?`<img class="cover" src="${esc(p.immagine)}" alt="${esc(p.nome)}">`:"")}
+    <dl class="facts">${p.cosa?`<div><dt>Cos'è</dt><dd>${esc(p.cosa)}</dd></div>`:""}${p.materiali?`<div><dt>Materiali</dt><dd>${esc(p.materiali)}</dd></div>`:""}${p.misure?`<div><dt>Misure</dt><dd>${esc(p.misure)}</dd></div>`:""}</dl>
+    ${p.descrizione?`<p>${esc(p.descrizione)}</p>`:""}
+    ${imgs.length?`<div class="gallery">${imgs.map(u=>`<img src="${esc(u)}" alt="${esc(p.nome)}" loading="lazy">`).join("")}</div>`:""}`;
+  $("col-back").addEventListener("click",()=>{d.hidden=true;$("col-grid").hidden=false;window.jvStop3d&&window.jvStop3d();});
+  const cl=$("col-link");if(cl)cl.addEventListener("click",e=>copyText(pg,e.currentTarget));
+  const cm=$("col-mail");if(cm)cm.addEventListener("click",()=>{$("e-concept").value=p.slug;setPerche();openTab("scr");});
+  $("col-grid").hidden=true;d.scrollIntoView({behavior:"smooth",block:"start"});
+  if(p.modello&&window.jv3d)window.jv3d($("stage"),p.modello);
+}
+
+/* ---------- richieste dal sito ---------- */
+let rFilter="tutte",rCur=null;
+function renderRic(){
+  const L=rFilter==="tutte"?ric:rFilter==="approva"?ric.filter(r=>r.j&&r.j.stato==="da_approvare"):ric.filter(r=>r.stato===rFilter);
+  if(!L.length){$("ric-list").innerHTML=`<div class="empty"><strong>${ric.length?"Niente in questa lista":"Ancora nessuna richiesta dal sito"}</strong>${ric.length?"Prova un altro filtro.":"Appena un cliente compila il modulo la vedi qui."}</div>`;return;}
+  $("ric-list").innerHTML=L.map(r=>`<button class="row" data-id="${esc(r.id)}" aria-current="${rCur===r.id}">
+    <span class="n">${esc(r.nome)}${r.paese?" · "+esc(r.paese):""}</span><span class="d">${esc(fmtDate(r.created_at))}</span>
+    <span class="s"><span class="pill ${esc(r.stato)}">${esc(LBL.stato[r.stato]||r.stato)}</span> ${esc(LBL.tipo[r.tipo]||r.tipo||"")}${r.progetto?" · "+esc(r.progetto):""}${r.j?` · <span class="js ${esc(r.j.stato)}">${esc(JLBL[r.j.stato]||r.j.stato)}</span>`:""}</span></button>`).join("");
+  $("ric-list").querySelectorAll(".row").forEach(b=>b.addEventListener("click",()=>{rCur=b.dataset.id;renderRic();
+    if(matchMedia("(max-width:820px)").matches)$("ric-detail").scrollIntoView({behavior:"smooth",block:"start"});}));
+  if(rCur)renderRicDetail();
+}
+document.querySelectorAll("[data-f]").forEach(b=>b.addEventListener("click",()=>{rFilter=b.dataset.f;
+  document.querySelectorAll("[data-f]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));renderRic();}));
+function renderRicDetail(){
+  const r=ric.find(x=>x.id===rCur);if(!r)return;const j=r.j;
+  let jb="";
+  if(j){
+    const head=`<p class="eyebrow">JARVIS · <span class="js ${esc(j.stato)}">${esc(JLBL[j.stato]||j.stato)}</span></p>${j.riassunto?`<p>${esc(j.riassunto)}</p>`:""}`;
+    if(j.stato==="da_approvare"||j.stato==="errore")jb=`<div class="jbox">${head}${j.motivo?`<p class="note">Perché aspetto te: ${esc(j.motivo)}</p>`:""}${j.errore?`<p class="err">Problema: ${esc(j.errore)}</p>`:""}
+      ${j.testo?`<label class="f">Oggetto<input type="text" id="j-ogg" value="${esc(j.oggetto||"")}"></label><label class="f">Testo che verrà inviato a ${esc(r.email)}<textarea id="j-txt">${esc(j.testo)}</textarea></label>
+      <div class="btnrow"><button class="btn" id="j-ok" type="button">Approva e invia</button><button class="btn ghost" id="j-no" type="button">Scarta</button></div>`:""}<p class="err" id="j-err" hidden></p></div>`;
+    else jb=`<div class="jbox">${head}${j.stato==="inviata"?`<p class="note">Inviata il ${esc(fmtDate(j.inviata_at))}. Oggetto: ${esc(j.oggetto||"")}</p>`:""}${j.testo?`<blockquote>${esc(j.testo)}</blockquote>`:""}</div>`;
+  }
+  $("ric-detail").innerHTML=`<p class="eyebrow">${esc(LBL.tipo[r.tipo]||r.tipo||"")} · ${esc(fmtDate(r.created_at))}</p><h2>${esc(r.nome)}</h2>
+    <dl class="facts"><div><dt>Email</dt><dd class="contact">${esc(r.email)}</dd></div>
+      ${r.telefono?`<div><dt>Telefono</dt><dd class="contact">${esc(r.telefono)}</dd></div>`:""}${r.paese?`<div><dt>Paese</dt><dd>${esc(r.paese)}</dd></div>`:""}
+      ${r.profilo?`<div><dt>Profilo</dt><dd>${esc(LBL.profilo[r.profilo]||r.profilo)}</dd></div>`:""}${r.progetto?`<div><dt>Progetto</dt><dd>${esc(r.progetto)}</dd></div>`:""}
+      <div><dt>Preferisce</dt><dd>${esc(r.canale_preferito||"email")}</dd></div></dl>
+    ${r.messaggio?`<blockquote>${esc(r.messaggio)}</blockquote>`:""}${jb}
+    <div class="btnrow"><span class="note">Stato:</span>${["nuova","in_corso","chiusa"].map(s=>`<button class="btn ghost" data-st="${s}" type="button" ${r.stato===s?'aria-pressed="true" disabled':""}>${LBL.stato[s]}</button>`).join("")}</div>
+    <p class="err" id="r-err" hidden></p>`;
+  $("ric-detail").querySelectorAll("[data-st]").forEach(b=>b.addEventListener("click",async()=>{
+    const {error}=await sb.from("richieste").update({stato:b.dataset.st}).eq("id",r.id);
+    if(error){$("r-err").textContent="Non sono riuscito a salvare.";$("r-err").hidden=false;return;}r.stato=b.dataset.st;renderRic();}));
+  const ok=$("j-ok"),no=$("j-no");
+  if(ok)ok.addEventListener("click",async()=>{const t=$("j-txt").value.trim();if(!t)return;ok.disabled=true;
+    const {error}=await sb.from("jarvis_risposte").update({oggetto:$("j-ogg").value.trim(),testo:t,errore:null,stato:"approvata"}).eq("id",j.id).in("stato",["da_approvare","errore"]);
+    if(error){$("j-err").textContent="Non sono riuscito a salvare.";$("j-err").hidden=false;ok.disabled=false;return;}loadAll();});
+  if(no)no.addEventListener("click",async()=>{no.disabled=true;
+    const {error}=await sb.from("jarvis_risposte").update({stato:"scartata"}).eq("id",j.id).in("stato",["da_approvare","errore"]);
+    if(error){$("j-err").textContent="Non sono riuscito a salvare.";$("j-err").hidden=false;no.disabled=false;return;}loadAll();});
+}
+
+/* ---------- social ---------- */
+let sCur=null;
+function convs(){const map=new Map();
+  for(const m of soc){const k=m.canale+"|"+m.contatto_id;
+    if(!map.has(k))map.set(k,{k,canale:m.canale,id:String(m.contatto_id),nome:m.contatto_nome,last:m,attesa:false});
+    const c=map.get(k);if(!c.nome&&m.contatto_nome)c.nome=m.contatto_nome;if(m.direzione==="out"&&m.stato==="da_approvare")c.attesa=true;}
+  return [...map.values()];}
+function renderSoc(){const L=convs();
+  if(!L.length){$("soc-list").innerHTML=`<div class="empty"><strong>Nessuna conversazione per ora</strong></div>`;return;}
+  $("soc-list").innerHTML=L.map(c=>`<button class="row" data-k="${esc(c.k)}" aria-current="${sCur===c.k}">
+    <span class="n">${esc(c.nome||("Contatto "+c.id.slice(-4)))}</span><span class="d">${esc(fmtDate(c.last.created_at))}</span>
+    <span class="s">${esc(CAN[c.canale]||c.canale)}${c.attesa?` · <span class="js da_approvare">da approvare</span>`:""} · ${esc(String(c.last.testo||"").slice(0,80))}</span></button>`).join("");
+  $("soc-list").querySelectorAll(".row").forEach(b=>b.addEventListener("click",()=>{sCur=b.dataset.k;renderSoc();}));
+  if(sCur)renderSocDetail();
+}
+function renderSocDetail(){
+  const i=sCur.indexOf("|"),canale=sCur.slice(0,i),id=sCur.slice(i+1);
+  const ms=soc.filter(m=>m.canale===canale&&String(m.contatto_id)===id).reverse();
+  const nome=(ms.find(m=>m.contatto_nome)||{}).contatto_nome||("Contatto "+id.slice(-4));
+  $("soc-detail").innerHTML=`<p class="eyebrow">${esc(CAN[canale]||canale)}</p><h2>${esc(nome)}</h2><div class="chat">${ms.map(m=>{
+    if(m.direzione==="in")return `<div class="msg in">${esc(m.testo||"")}</div>`;
+    if(m.stato==="inviata")return `<div class="msg j">${esc(m.testo||"")}</div>`;
+    if(m.stato==="da_approvare"||(m.stato==="errore"&&m.testo))return `<div class="jbox"><p class="eyebrow"><span class="js ${esc(m.stato)}">${m.stato==="errore"?"errore":"da approvare"}</span></p>
+      ${m.motivo?`<p class="note">Perché aspetto te: ${esc(m.motivo)}</p>`:""}${m.errore?`<p class="err">${esc(m.errore)}</p>`:""}
+      <textarea data-t="${esc(m.id)}">${esc(m.testo||"")}</textarea>
+      <div class="btnrow"><button class="btn" data-ok="${esc(m.id)}" type="button">Approva e invia</button><button class="btn ghost" data-no="${esc(m.id)}" type="button">Scarta</button></div></div>`;
+    return "";}).join("")}</div><p class="err" id="s-err" hidden></p>`;
+  const act=async(mid,upd,b)=>{b.disabled=true;
+    const {error}=await sb.from("jarvis_messaggi").update(upd).eq("id",mid).eq("direzione","out").in("stato",["da_approvare","errore"]);
+    if(error){$("s-err").textContent="Non sono riuscito a salvare.";$("s-err").hidden=false;b.disabled=false;return;}loadAll();};
+  $("soc-detail").querySelectorAll("[data-ok]").forEach(b=>b.addEventListener("click",()=>{const t=$("soc-detail").querySelector(`[data-t="${CSS.escape(b.dataset.ok)}"]`).value.trim();if(t)act(b.dataset.ok,{testo:t,errore:null,stato:"approvata"},b);}));
+  $("soc-detail").querySelectorAll("[data-no]").forEach(b=>b.addEventListener("click",()=>act(b.dataset.no,{stato:"scartata"},b)));
+}
+
+/* ---------- chiedi: risposte locali, senza IA ---------- */
+function say(q,a){const c=$("chat");const m=document.createElement("div");m.className="msg me";m.textContent=q;c.appendChild(m);
+  const r=document.createElement("div");r.className="msg j";r.textContent=a;c.appendChild(r);r.scrollIntoView({behavior:"smooth",block:"nearest"});}
+const ANS={
+  adesso:()=>{const p=oggi&&Array.isArray(oggi.priorita)?oggi.priorita:[];
+    const da=clienti.filter(c=>(c.stato||"da_contattare")==="da_contattare").sort((a,b)=>(b.oggetto?1:0)-(a.oggetto?1:0));
+    const risp=clienti.filter(c=>["risposta","trattativa"].includes(c.stato));const na=nApprova();
+    let t="";
+    if(risp.length)t+="Prima di tutto: rispondi a "+risp.map(c=>c.nome).join(", ")+".\n\n";
+    if(na)t+="Hai "+na+(na===1?" risposta":" risposte")+" da approvare (scheda Richieste o Social).\n\n";
+    if(p.length)t+="Le priorità di oggi:\n"+p.slice(0,3).map((x,i)=>(i+1)+". "+x).join("\n")+"\n\n";
+    if(da.length)t+="Da contattare: "+da.length+". Inizia da "+da[0].nome+": l'email è pronta in Clienti.";
+    return t.trim()||"Oggi non ho ancora le priorità. Arrivano alle 7:52.";},
+  risposte:()=>{const r=clienti.filter(c=>["risposta","trattativa"].includes(c.stato));
+    return r.length?"Hanno risposto: "+r.map(c=>c.nome+" ("+CST[c.stato]+")").join(", ")+".":"Per ora nessuno ha risposto. Ricorda di segnarlo in Clienti quando succede.";},
+  attesa:()=>{const r=clienti.filter(c=>c.stato==="inviato"&&days(c.aggiornato_at)>=10);
+    return r.length?"Da ricontattare: "+r.map(c=>c.nome+" ("+days(c.aggiornato_at)+" giorni)").join(", ")+". In Scrivi trovi la risposta pronta “Nessuna risposta dopo 10 giorni”.":"Nessuno aspetta da più di 10 giorni.";},
+  prezzo:()=>"Non dare un numero. Spiega che ogni padiglione è su misura e che il prezzo arriva con il preventivo dopo il concept. Chiedi luogo, dimensioni, uso e tempi. La risposta pronta è in Scrivi → “Chiede subito il prezzo”."
+};
+$("suggest").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>say(b.textContent,ANS[b.dataset.q]())));
+$("c-claude").addEventListener("click",async e=>{
+  const q=$("c-in").value.trim();if(!q){$("c-in").focus();return;}
+  const p=oggi&&Array.isArray(oggi.priorita)?oggi.priorita.join(" | "):"–";
+  const cl=clienti.slice(0,15).map(c=>`${c.nome} (${CST[c.stato||"da_contattare"]})`).join("; ")||"–";
+  const txt=`Sono Brenda Bonomelli, Visual Concept Designer (Bonomelli Estate, bonomelliestate.com). Ho l'ADHD: rispondimi in italiano semplice e breve.\nPriorità di oggi: ${p}\nClienti: ${cl}\n\nDomanda: ${q}`;
+  try{await navigator.clipboard.writeText(txt);$("c-note").hidden=false;}catch(_){}
+  window.open("https://claude.ai/new?q="+encodeURIComponent(txt),"_blank","noopener");
+});
+$("c-clear").addEventListener("click",()=>{$("chat").innerHTML="";$("c-in").value="";$("c-note").hidden=true;});
+
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+start();
+})();
+</script>
+
+<script type="module">
+/* Visore 3D: si carica solo quando apri un concept con modello. */
+let stop=null;
+window.jvStop3d=()=>{if(stop){stop();stop=null;}};
+window.jv3d=async(stage,url)=>{
+  window.jvStop3d();
+  try{
+    const THREE=await import("three");
+    const {GLTFLoader}=await import("three/addons/loaders/GLTFLoader.js");
+    const {OrbitControls}=await import("three/addons/controls/OrbitControls.js");
+    const r=new THREE.WebGLRenderer({antialias:true});r.setPixelRatio(Math.min(devicePixelRatio,2));
+    stage.prepend(r.domElement);
+    const scene=new THREE.Scene();scene.background=new THREE.Color("#181d16");
+    scene.add(new THREE.HemisphereLight(0xffffff,0x8a7a66,1.5));
+    const sun=new THREE.DirectionalLight(0xfff0d8,2.2);sun.position.set(30,50,20);scene.add(sun);
+    const cam=new THREE.PerspectiveCamera(40,4/3,0.1,2000);
+    const ctl=new OrbitControls(cam,r.domElement);ctl.enableDamping=true;ctl.maxPolarAngle=Math.PI*0.49;
+    const g=await new GLTFLoader().loadAsync(url);scene.add(g.scene);
+    const box=new THREE.Box3().setFromObject(g.scene);const size=box.getSize(new THREE.Vector3()).length();const c=box.getCenter(new THREE.Vector3());
+    cam.position.set(c.x+size*0.55,c.y+size*0.42,c.z+size*0.55);ctl.target.copy(c);ctl.minDistance=size*0.05;ctl.maxDistance=size*1.5;ctl.update();
+    const fit=()=>{const w=stage.clientWidth,h=stage.clientHeight;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();};
+    const ro=new ResizeObserver(fit);ro.observe(stage);fit();
+    let on=true;const loop=()=>{if(!on)return;ctl.update();r.render(scene,cam);requestAnimationFrame(loop);};loop();
+    stop=()=>{on=false;ro.disconnect();ctl.dispose();r.dispose();r.domElement.remove();};
+  }catch(e){const p=document.createElement("p");p.className="err";p.textContent="Non riesco a mostrare il modello 3D su questo dispositivo.";stage.replaceWith(p);}
+};
+</script>
+</body>
+</html>
