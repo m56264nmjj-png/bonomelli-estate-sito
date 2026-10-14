@@ -67,6 +67,7 @@ a{color:var(--brass)}
 .js{font-weight:500}.js.inviata{color:var(--ok)}.js.da_approvare{color:var(--warn)}.js.errore,.js.scartata{color:var(--bad)}
 .pill.nuova{color:var(--warn)} .pill.in_corso{color:var(--brass)} .pill.chiusa{color:var(--ok)}
 .pill.cl-A{color:var(--ok)} .pill.cl-B{color:var(--brass)} .pill.cl-C{color:var(--muted)}
+.pill.nda-bozza{color:var(--warn)} .pill.nda-inviato{color:var(--brass)} .pill.nda-firmato{color:var(--ok)} .pill.nda-rifiutato{color:var(--bad)}
 .pill.st-da_contattare{color:var(--warn)} .pill.st-inviato{color:var(--brass)} .pill.st-risposta,.pill.st-trattativa{color:var(--ok)} .pill.st-chiuso{color:var(--muted)}
 .jbox{border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:10px}
 .panel{background:var(--panel);border-top:1px solid var(--line);padding:24px;display:flex;flex-direction:column;gap:18px;min-width:0}
@@ -168,6 +169,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
   <nav class="tabs" role="tablist" aria-label="Sezioni">
     <button role="tab" id="tab-oggi" aria-selected="true" aria-controls="p-oggi">Oggi</button>
     <button role="tab" id="tab-cli" aria-selected="false" aria-controls="p-cli">Clienti<span class="count" id="cnt-cli"></span></button>
+    <button role="tab" id="tab-nda" aria-selected="false" aria-controls="p-nda">NDA<span class="count" id="cnt-nda"></span></button>
     <button role="tab" id="tab-scr" aria-selected="false" aria-controls="p-scr">Scrivi</button>
     <button role="tab" id="tab-col" aria-selected="false" aria-controls="p-col">Collezione</button>
     <button role="tab" id="tab-ric" aria-selected="false" aria-controls="p-ric">Richieste<span class="count" id="cnt-ric"></span></button>
@@ -219,6 +221,33 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
         <h2>Ogni mattina nuovi clienti veri</h2>
         <p>Il Cacciatore cerca ville, hotel e tenute con un progetto in corso. Per ognuno trovi il motivo, la fonte e l'email già scritta come la tua email tipo. E per ognuno anche la persona giusta su LinkedIn, con il messaggio pronto. Lo invii tu e segni qui cosa è successo.</p>
         <p class="note">Classe A: cercano già un designer. Classe B: progetto in corso. Classe C: luogo adatto.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- NDA -->
+  <section id="p-nda" role="tabpanel" aria-labelledby="tab-nda" hidden>
+    <div class="split">
+      <div>
+        <div class="filters" role="group" aria-label="Filtra NDA">
+          <button data-nf="aperti" aria-pressed="true">Aperti</button>
+          <button data-nf="firmato" aria-pressed="false">Firmati</button>
+          <button data-nf="rifiutato" aria-pressed="false">Rifiutati</button>
+          <button data-nf="tutti" aria-pressed="false">Tutti</button>
+        </div>
+        <div class="list" id="nda-list"><div class="empty"><strong>Carico gli NDA…</strong></div></div>
+        <div class="jbox" style="margin-top:16px">
+          <p class="eyebrow">Nuovo NDA</p>
+          <label class="f">Per quale cliente<select id="nda-cli"></select></label>
+          <button class="btn" id="nda-new" type="button">Prepara un NDA</button>
+          <p class="err" id="nda-new-err" hidden></p>
+        </div>
+      </div>
+      <div class="panel" id="nda-detail">
+        <p class="eyebrow">Accordi di riservatezza</p>
+        <h2>Prima l'NDA, poi i file tecnici</h2>
+        <p>Qui ricordi a chi hai proposto l'accordo e come è andata. Bozza → Inviato → Firmato. Chi rifiuta lo sposti tra i Chiusi della lista clienti con un tocco.</p>
+        <p class="note">Modello di partenza: <a href="https://claude.ai/code/artifact/f4d97941-3570-4982-aca4-db6c594c0e74" target="_blank" rel="noopener">l'NDA di Marius</a>. Ogni NDA va completato con i dati e fatto rivedere a un avvocato.</p>
       </div>
     </div>
   </section>
@@ -367,25 +396,26 @@ $("logout").addEventListener("click",async()=>{await sb.auth.signOut();start();}
 sb.auth.onAuthStateChange(ev=>{if(ev==="SIGNED_OUT")start();});
 
 /* ---------- schede ---------- */
-const TABS=["oggi","cli","scr","col","ric","soc","ask"];
+const TABS=["oggi","cli","nda","scr","col","ric","soc","ask"];
 function openTab(t){TABS.forEach(x=>{$("tab-"+x).setAttribute("aria-selected",x===t?"true":"false");$("p-"+x).hidden=x!==t;});try{localStorage.setItem("jv-tab",t)}catch(e){}}
 TABS.forEach(t=>$("tab-"+t).addEventListener("click",()=>openTab(t)));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>openTab(b.dataset.go.slice(4))));
 try{const h=location.hash.slice(1);const t=TABS.includes(h)?h:localStorage.getItem("jv-tab");if(TABS.includes(t))openTab(t);}catch(e){}
 
 /* ---------- dati ---------- */
-let oggi=null,clienti=[],collezione=[],ric=[],soc=[];
+let oggi=null,clienti=[],collezione=[],ric=[],soc=[],nda=[];
 async function loadAll(){
   chip("","Aggiorno…");
-  const [b,c,k,r,j,m]=await Promise.all([
+  const [b,c,k,r,j,m,n]=await Promise.all([
     sb.from("app_bacheca").select("contenuto,aggiornato_at").eq("chiave","oggi").maybeSingle(),
     sb.from("app_clienti").select("*").order("data",{ascending:false}),
     sb.from("app_collezione").select("*").order("ordine"),
     sb.from("richieste").select("id,created_at,nome,email,telefono,paese,profilo,tipo,progetto,messaggio,canale_preferito,fonte,lingua,stato").order("created_at",{ascending:false}).limit(300),
     sb.from("jarvis_risposte").select("id,richiesta_id,stato,oggetto,testo,riassunto,motivo,errore,inviata_at").eq("canale","email"),
-    sb.from("jarvis_messaggi").select("id,created_at,canale,contatto_id,contatto_nome,direzione,testo,stato,motivo,errore").order("created_at",{ascending:false}).limit(500)
+    sb.from("jarvis_messaggi").select("id,created_at,canale,contatto_id,contatto_nome,direzione,testo,stato,motivo,errore").order("created_at",{ascending:false}).limit(500),
+    sb.from("app_nda").select("*").order("creato_at",{ascending:false})
   ]);
-  const errs=[b,c,k,r,j,m].filter(x=>x.error);
+  const errs=[b,c,k,r,j,m,n].filter(x=>x.error);
   if(errs.length){
     const msg=errs[0].error.message||"";
     if(/JWT|expired|auth/i.test(msg)){await sb.auth.signOut();return;}
@@ -395,8 +425,8 @@ async function loadAll(){
   clienti=c.data||[];collezione=k.data||[];
   const js=new Map((j.data||[]).map(x=>[x.richiesta_id,x]));
   ric=(r.data||[]).map(x=>({...x,j:js.get(x.id)||null}));
-  soc=m.data||[];
-  renderOggi();renderClienti();renderCol();renderRic();renderSoc();renderTiles();fillEmailClients();
+  soc=m.data||[];nda=n.data||[];
+  renderOggi();renderClienti();renderNda();renderCol();renderRic();renderSoc();renderTiles();fillEmailClients();
   if(!c.data?.length&&!k.data?.length&&!errs.length)chip("bad","Nessun dato: l'accesso non è ancora attivo");
 }
 $("refresh").addEventListener("click",loadAll);
@@ -421,6 +451,7 @@ function renderTiles(){
   $("n-col").textContent=collezione.length;
   const na=nApprova();$("n-app").textContent=na;$("t-app").classList.toggle("att",na>0);
   const nr=ric.filter(r=>r.j&&r.j.stato==="da_approvare").length;$("cnt-ric").textContent=nr||"";$("f-approva").textContent=nr?`Da approvare (${nr})`:"Da approvare";
+  const nn=nda.filter(x=>x.stato==="bozza"||x.stato==="inviato").length;$("cnt-nda").textContent=nn||"";
   const ns=soc.filter(m=>m.direzione==="out"&&m.stato==="da_approvare").length;$("cnt-soc").textContent=ns||"";
 }
 
@@ -465,15 +496,79 @@ function renderCliDetail(){
         <a class="btn ghost" href="${esc(safeUrl(c.li_profilo)||("https://www.linkedin.com/search/results/people/?keywords="+encodeURIComponent(c.nome)))}" target="_blank" rel="noopener">Trova la persona</a>
         <a class="btn ghost" href="${esc(safeUrl(c.li_azienda)||("https://www.linkedin.com/search/results/companies/?keywords="+encodeURIComponent(c.nome)))}" target="_blank" rel="noopener">Pagina dell'azienda</a></div>
       ${st==="da_contattare"?`<p class="note">Su LinkedIn: apri il profilo, tocca Collegati, poi “Aggiungi una nota” e incolla il messaggio.</p>`:""}</div>
+    ${(()=>{const x=nda.find(z=>z.cliente_slug===c.slug);return `<div class="jbox"><p class="eyebrow">NDA</p>${x?`<p>${esc(NST[x.stato])}${x.risposta_at?" · "+esc(fmtDate(x.risposta_at)):x.inviato_at?" · inviato "+esc(fmtDate(x.inviato_at)):""}</p><div class="btnrow"><button class="btn ghost" id="cl-nda" data-id="${esc(x.id)}" type="button">Apri l'NDA</button></div>`:`<p class="note">Nessun NDA per questo cliente.</p><div class="btnrow"><button class="btn ghost" id="cl-nda-new" type="button">Prepara un NDA</button></div>`}</div>`;})()}
     <div><p class="eyebrow">Cosa è successo</p><div class="btnrow">${Object.keys(CST).map(s=>`<button class="btn ghost" data-cs="${s}" type="button" ${st===s?'aria-pressed="true" disabled':""}>${CST[s]}</button>`).join("")}</div>
     <p class="note">Segna “Contattato” solo dopo aver scritto tu (email o LinkedIn). JARVIS non invia niente.</p><p class="err" id="cl-err" hidden></p></div>`;
   const cp=$("cl-copy");if(cp)cp.addEventListener("click",e=>copyText(c.messaggio,e.currentTarget));
   const lc=$("li-copy");if(lc)lc.addEventListener("click",e=>copyText(c.li_messaggio,e.currentTarget));
+  const cn=$("cl-nda");if(cn)cn.addEventListener("click",()=>{nCur=cn.dataset.id;nFilter="tutti";openTab("nda");renderNda();});
+  const cnn=$("cl-nda-new");if(cnn)cnn.addEventListener("click",()=>newNda(c.slug));
   const ed=$("cl-edit");if(ed)ed.addEventListener("click",()=>{$("e-cli").value=c.slug;fromClient();openTab("scr");});
   $("cli-detail").querySelectorAll("[data-cs]").forEach(b=>b.addEventListener("click",async()=>{
     b.disabled=true;const {error}=await sb.from("app_clienti").update({stato:b.dataset.cs,aggiornato_at:new Date().toISOString()}).eq("slug",c.slug);
     if(error){const er=$("cl-err");er.textContent="Non sono riuscito a salvare. Riprova.";er.hidden=false;b.disabled=false;return;}
     c.stato=b.dataset.cs;c.aggiornato_at=new Date().toISOString();renderClienti();renderTiles();}));
+}
+
+/* ---------- NDA ---------- */
+const NST={bozza:"Da inviare",inviato:"Inviato · in attesa",firmato:"Firmato",rifiutato:"Rifiutato"};
+const MODELLO_NDA="https://claude.ai/code/artifact/f4d97941-3570-4982-aca4-db6c594c0e74";
+let nFilter="aperti",nCur=null;
+function renderNda(){
+  const L=nda.filter(x=>nFilter==="tutti"||(nFilter==="aperti"?["bozza","inviato"].includes(x.stato):x.stato===nFilter));
+  $("nda-list").innerHTML=L.length?L.map(x=>`<button class="row" data-id="${esc(x.id)}" aria-current="${nCur===x.id}">
+    <span class="n">${esc(x.controparte)}</span><span class="d">${esc(fmtDate(x.aggiornato_at))}</span>
+    <span class="s"><span class="pill nda-${esc(x.stato)}">${esc(NST[x.stato])}</span> ${esc(x.persona||"")}</span></button>`).join("")
+    :`<div class="empty"><strong>${nda.length?"Niente in questa lista":"Ancora nessun NDA"}</strong>${nda.length?"Prova un altro filtro.":""}</div>`;
+  $("nda-list").querySelectorAll(".row").forEach(b=>b.addEventListener("click",()=>{nCur=b.dataset.id;renderNda();
+    if(matchMedia("(max-width:820px)").matches)$("nda-detail").scrollIntoView({behavior:"smooth",block:"start"});}));
+  const used=new Set(nda.map(x=>x.cliente_slug));
+  $("nda-cli").innerHTML=clienti.filter(c=>!used.has(c.slug)&&c.stato!=="chiuso").map(c=>`<option value="${esc(c.slug)}">${esc(c.nome)}</option>`).join("")||`<option value="">— tutti hanno già un NDA —</option>`;
+  if(nCur)renderNdaDetail();
+}
+document.querySelectorAll("[data-nf]").forEach(b=>b.addEventListener("click",()=>{nFilter=b.dataset.nf;
+  document.querySelectorAll("[data-nf]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));renderNda();}));
+async function newNda(slug){
+  const c=clienti.find(x=>x.slug===slug);const er=$("nda-new-err");er.hidden=true;if(!c)return;
+  const {data,error}=await sb.from("app_nda").insert({cliente_slug:c.slug,controparte:c.nome,persona:c.li_persona||c.chi||null,stato:"bozza",note:"Parti dal modello (l'NDA di Marius): cambia le parti e i dati, poi fallo rivedere."}).select().single();
+  if(error){er.textContent="Non sono riuscito a creare l'NDA.";er.hidden=false;return;}
+  nda.unshift(data);nCur=data.id;nFilter="aperti";openTab("nda");renderNda();renderTiles();
+}
+$("nda-new").addEventListener("click",()=>{const v=$("nda-cli").value;if(v)newNda(v);});
+function renderNdaDetail(){
+  const x=nda.find(z=>z.id===nCur);if(!x)return;const c=clienti.find(z=>z.slug===x.cliente_slug);
+  const doc=safeUrl(x.documento);
+  $("nda-detail").innerHTML=`<p class="eyebrow">NDA ${esc(x.tipo||"")} · creato il ${esc(fmtDate(x.creato_at))}</p><h2>${esc(x.controparte)}</h2>
+    <dl class="facts"><div><dt>Persona</dt><dd>${esc(x.persona||"–")}</dd></div><div><dt>Stato</dt><dd>${esc(NST[x.stato])}</dd></div>
+      ${x.inviato_at?`<div><dt>Inviato</dt><dd>${esc(fmtDate(x.inviato_at))}</dd></div>`:""}${x.risposta_at?`<div><dt>Risposta</dt><dd>${esc(fmtDate(x.risposta_at))}</dd></div>`:""}
+      ${c?`<div><dt>Cliente</dt><dd>${esc(CST[c.stato||"da_contattare"]||c.stato)}</dd></div>`:""}</dl>
+    <div class="btnrow">${doc?`<a class="btn ghost" href="${esc(doc)}" target="_blank" rel="noopener">Apri il documento</a>`:`<a class="btn ghost" href="${MODELLO_NDA}" target="_blank" rel="noopener">Apri il modello</a>`}${c?`<button class="btn ghost" id="nda-cli-go" type="button">Vai al cliente</button>`:""}</div>
+    <label class="f">Note<textarea id="nda-note" style="min-height:90px">${esc(x.note||"")}</textarea></label>
+    <label class="f">Link al documento (se ne hai uno suo)<input type="text" id="nda-doc" value="${esc(x.documento||"")}" placeholder="https://…"></label>
+    <div class="btnrow"><button class="btn ghost" id="nda-save" type="button">Salva note e link</button></div>
+    <div><p class="eyebrow">Com'è andata</p><div class="btnrow">
+      <button class="btn ghost" data-ns="inviato" type="button" ${x.stato==="inviato"?"disabled":""}>L'ho inviato</button>
+      <button class="btn" data-ns="firmato" type="button" ${x.stato==="firmato"?"disabled":""}>Ha firmato</button>
+      <button class="btn ghost" data-ns="rifiutato" type="button" ${x.stato==="rifiutato"?"disabled":""}>Ha rifiutato</button>
+      ${x.stato!=="bozza"?`<button class="btn ghost" data-ns="bozza" type="button">Rimetti da inviare</button>`:""}</div>
+    <p class="note" id="nda-msg"></p><p class="err" id="nda-err" hidden></p></div>`;
+  const g=$("nda-cli-go");if(g)g.addEventListener("click",()=>{cCur=c.slug;cFilter="tutti";document.querySelectorAll("[data-cf]").forEach(z=>z.setAttribute("aria-pressed",z.dataset.cf==="tutti"?"true":"false"));openTab("cli");renderClienti();});
+  $("nda-save").addEventListener("click",async e=>{const d=$("nda-doc").value.trim();
+    if(d&&!safeUrl(d)){$("nda-err").textContent="Il link deve iniziare con https://";$("nda-err").hidden=false;return;}
+    const {error}=await sb.from("app_nda").update({note:$("nda-note").value,documento:d||null,aggiornato_at:new Date().toISOString()}).eq("id",x.id);
+    if(error){$("nda-err").textContent="Non sono riuscito a salvare.";$("nda-err").hidden=false;return;}x.note=$("nda-note").value;x.documento=d||null;e.target.textContent="Salvato";});
+  $("nda-detail").querySelectorAll("[data-ns]").forEach(b=>b.addEventListener("click",async()=>{
+    const st=b.dataset.ns,now=new Date().toISOString();const upd={stato:st,aggiornato_at:now};
+    if(st==="inviato")upd.inviato_at=now;if(st==="firmato"||st==="rifiutato")upd.risposta_at=now;if(st==="bozza"){upd.inviato_at=null;upd.risposta_at=null;}
+    b.disabled=true;const {error}=await sb.from("app_nda").update(upd).eq("id",x.id);
+    if(error){$("nda-err").textContent="Non sono riuscito a salvare.";$("nda-err").hidden=false;b.disabled=false;return;}
+    Object.assign(x,upd);
+    if(st==="rifiutato"&&c&&c.stato!=="chiuso"&&confirm(`${c.nome} ha rifiutato l'NDA. Lo sposto tra i Chiusi nella lista clienti? Non viene cancellato.`)){
+      const r=await sb.from("app_clienti").update({stato:"chiuso",aggiornato_at:now}).eq("slug",c.slug);if(!r.error){c.stato="chiuso";c.aggiornato_at=now;}}
+    if(st==="firmato"&&c&&c.stato!=="trattativa"&&confirm(`${c.nome} ha firmato. Segno il cliente "In trattativa"?`)){
+      const r=await sb.from("app_clienti").update({stato:"trattativa",aggiornato_at:now}).eq("slug",c.slug);if(!r.error){c.stato="trattativa";c.aggiornato_at=now;}}
+    renderNda();renderClienti();renderTiles();
+    if(st==="firmato")$("nda-msg").textContent="Ottimo: ora puoi condividere disegni e file tecnici.";}));
 }
 
 /* ---------- scrivi: email tipo ---------- */
