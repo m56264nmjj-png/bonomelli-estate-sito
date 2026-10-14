@@ -1,6 +1,8 @@
 
 (function(){
   var root=document.documentElement;
+  /* site root, from this script's own address (pages live at / and /en/) */
+  var BASE=(document.currentScript&&document.currentScript.src||'').replace(/assets\/site\.js(\?.*)?$/,'');
   root.classList.add('js');
   /* header turns solid after the opening */
   var hd=document.querySelector('header');var isHome=!!document.getElementById('op-bg');
@@ -35,14 +37,6 @@
   st.addEventListener('touchstart',function(e){sx=e.touches[0].clientX},{passive:true});
   st.addEventListener('touchend',function(e){if(sx===null)return;var dx=e.changedTouches[0].clientX-sx;if(Math.abs(dx)>45)show(idx+(dx<0?1:-1));sx=null});
 
-  function setLang(l){
-    root.setAttribute('lang',l);
-    document.querySelectorAll('.lang button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.l===l?'true':'false')});
-    try{localStorage.setItem('be-lang',l)}catch(e){}
-  }
-  var saved=null;try{saved=localStorage.getItem('be-lang')}catch(e){}
-  setLang(saved==='en'?'en':'it');
-  document.querySelectorAll('.lang button').forEach(function(b){b.addEventListener('click',function(){setLang(b.dataset.l)})});
 
   document.addEventListener('contextmenu',function(e){if(e.target.closest('img,video'))e.preventDefault()});
   document.addEventListener('dragstart',function(e){if(e.target.closest('img,video'))e.preventDefault()});
@@ -69,8 +63,6 @@
   var form=document.getElementById('enq'),st=document.getElementById('f-status'),btn=document.getElementById('f-send');
   if(form){
   function T(it,en){return root.lang==='en'?en:it}
-  function relabel(){document.querySelectorAll('option[data-it]').forEach(function(o){o.textContent=root.lang==='en'?o.dataset.en:o.dataset.it})}
-  relabel();document.querySelectorAll('.lang button').forEach(function(b){b.addEventListener('click',relabel)});
   form.addEventListener('submit',function(e){
     e.preventDefault();st.className='f-msg';st.textContent='';
     var v=function(id){return document.getElementById(id).value.trim()};
@@ -81,7 +73,7 @@
     var data={nome:v('f-nome'),email:v('f-email'),telefono:v('f-tel')||null,paese:v('f-paese')||null,tipo:v('f-tipo'),profilo:v('f-profilo')||null,progetto:v('f-progetto')||null,canale_preferito:v('f-canale')||null,fonte:v('f-fonte')||null,messaggio:v('f-msg')||null,lingua:root.lang==='en'?'en':'it',consenso_privacy:true};
     btn.disabled=true;st.textContent=T('Invio in corso…','Sending…');
     fetch(SB+'/rest/v1/richieste',{method:'POST',headers:{'apikey':KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(data)})
-    .then(function(r){if(!r.ok)throw new Error(r.status);form.reset();relabel();st.classList.add('ok');st.textContent=T('Grazie. La sua richiesta è arrivata allo studio: le risponderemo personalmente.','Thank you. Your enquiry has reached the studio: we will reply to you personally.')})
+    .then(function(r){if(!r.ok)throw new Error(r.status);form.reset();st.classList.add('ok');st.textContent=T('Grazie. La sua richiesta è arrivata allo studio: le risponderemo personalmente.','Thank you. Your enquiry has reached the studio: we will reply to you personally.')})
     .catch(function(){st.classList.add('err');st.textContent=T('Non è stato possibile inviare la richiesta. Scriva a studio@bonomelliestate.it o su WhatsApp al +39 351 657 5517.','Your enquiry could not be sent. Please write to studio@bonomelliestate.it or on WhatsApp at +39 351 657 5517.')})
     .finally(function(){btn.disabled=false});
   });
@@ -106,14 +98,14 @@
   var cnote={base:['La seduta poggia su un anello di pietra, come un fiore sul suo vaso.','The seat rests on a stone ring, like a flower on its vase.'],guscio:['La pietra avvolge la seduta come un calice; i petali dello schienale sono arrotondati.','Stone wraps the seat like a chalice; the back petals are rounded.'],affilato:['Lo stesso guscio di pietra, con i petali dello schienale più slanciati e appuntiti.','The same stone shell, with slimmer, pointed back petals.']};
   ct.forEach(function(t){t.addEventListener('click',function(){
     ct.forEach(function(x){x.setAttribute('aria-selected',x===t?'true':'false')});
-    var v=t.dataset.c;document.getElementById('c1').src='img/corolla-'+v+'-1.webp';document.getElementById('c2').src='img/corolla-'+v+'-2.webp';
-    var n=document.getElementById('c-note');n.children[0].textContent=cnote[v][0];n.children[1].textContent=cnote[v][1];
+    var v=t.dataset.c;document.getElementById('c1').src=BASE+'img/corolla-'+v+'-1.webp';document.getElementById('c2').src=BASE+'img/corolla-'+v+'-2.webp';
+    document.getElementById('c-note').textContent=cnote[v][root.lang==='en'?1:0];
   })});
   var tabs=document.querySelectorAll('#serra .variants button');
   var p=[document.getElementById('p1'),document.getElementById('p2'),document.getElementById('p3')];
   var parts=['galleria','alto','dettaglio'];
   tabs.forEach(function(t){t.addEventListener('click',function(){
     tabs.forEach(function(x){x.setAttribute('aria-selected',x===t?'true':'false')});
-    p.forEach(function(img,i){img.src='img/'+t.dataset.v+'-'+parts[i]+'.webp'});
+    p.forEach(function(img,i){img.src=BASE+'img/'+t.dataset.v+'-'+parts[i]+'.webp'});
   })});
 })();

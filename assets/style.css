@@ -1,7 +1,7 @@
 
-@font-face{font-family:"Cinzel";src:url("fonts/cinzel.woff") format("woff");font-weight:400 900;font-style:normal;font-display:swap}
-@font-face{font-family:"Work Sans";src:url("fonts/worksans.woff") format("woff");font-weight:100 900;font-style:normal;font-display:swap}
-@font-face{font-family:"Work Sans";src:url("fonts/worksans-italic.woff") format("woff");font-weight:100 900;font-style:italic;font-display:swap}
+@font-face{font-family:"Cinzel";src:url("../fonts/cinzel.woff") format("woff");font-weight:400 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Work Sans";src:url("../fonts/worksans.woff") format("woff");font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:"Work Sans";src:url("../fonts/worksans-italic.woff") format("woff");font-weight:100 900;font-style:italic;font-display:swap}
 /* Layout: neoclassico rivisitato 2026. A night garden of stone: one dark green-black ground,
    Roman inscriptional caps, a bronze Greek-key frieze between chapters, a cinematic opening
    that you walk into, and every image opening full screen like a plate in a folio. */
@@ -39,8 +39,8 @@ nav{display:flex;gap:28px;align-items:center;flex-wrap:wrap}
 nav a{font-size:13px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--stone-dim)}
 nav a:hover{color:var(--stone)}
 .lang{display:flex;gap:2px;border:1px solid var(--rule)}
-.lang button{background:none;border:0;color:var(--stone-dim);font:500 12px/1 var(--body);letter-spacing:.12em;padding:7px 9px;cursor:pointer}
-.lang button[aria-pressed="true"]{background:var(--stone);color:var(--ground)}
+.lang button,.lang a{background:none;border:0;color:var(--stone-dim);font:500 12px/1 var(--body);letter-spacing:.12em;padding:7px 9px;cursor:pointer;text-decoration:none}
+.lang button[aria-pressed="true"],.lang a[aria-current="true"]{background:var(--stone);color:var(--ground)}
 
 /* header over the opening */
 header{position:fixed;left:0;right:0;top:0;padding-top:env(safe-area-inset-top,0px);background:transparent;border-bottom-color:transparent;backdrop-filter:none;transition:background .6s ease,border-color .6s ease}
@@ -331,4 +331,4 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,4.6vw,60px);l
 .nav-open .menu-btn .mo{display:none}
 .nav-open .menu-btn .mc{display:inline}
 .enq{scroll-margin-top:110px}
-@media (max-width:420px){.mark{font-size:13px;letter-spacing:.18em}.bar-r{gap:8px}.lang button{padding:7px 7px}}
+@media (max-width:420px){.mark{font-size:13px;letter-spacing:.18em}.bar-r{gap:8px}.lang button,.lang a{padding:7px 7px}}

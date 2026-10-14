@@ -1,0 +1,13 @@
+name: Controllo sito
+# Verifica che le pagine pubblicate (radice ed en/) siano state rigenerate da src/ con tools/build.py.
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install beautifulsoup4==4.15.0
+      - run: python3 tools/build.py --check
