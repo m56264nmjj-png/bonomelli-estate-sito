@@ -67,6 +67,7 @@ a{color:var(--brass)}
 .js{font-weight:500}.js.inviata{color:var(--ok)}.js.da_approvare{color:var(--warn)}.js.errore,.js.scartata{color:var(--bad)}
 .pill.nuova{color:var(--warn)} .pill.in_corso{color:var(--brass)} .pill.chiusa{color:var(--ok)}
 .pill.cl-A{color:var(--ok)} .pill.cl-B{color:var(--brass)} .pill.cl-C{color:var(--muted)}
+.pill.ag-proposto{color:var(--warn)} .pill.ag-confermato{color:var(--ok)} .pill.ag-fatto{color:var(--muted)} .pill.ag-annullato{color:var(--bad)}
 .pill.nda-bozza{color:var(--warn)} .pill.nda-inviato{color:var(--brass)} .pill.nda-firmato{color:var(--ok)} .pill.nda-rifiutato{color:var(--bad)}
 .pill.st-da_contattare{color:var(--warn)} .pill.st-inviato{color:var(--brass)} .pill.st-risposta,.pill.st-trattativa{color:var(--ok)} .pill.st-chiuso{color:var(--muted)}
 .jbox{border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:10px}
@@ -168,6 +169,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
   <div class="frieze" aria-hidden="true"></div>
   <nav class="tabs" role="tablist" aria-label="Sezioni">
     <button role="tab" id="tab-oggi" aria-selected="true" aria-controls="p-oggi">Oggi</button>
+    <button role="tab" id="tab-age" aria-selected="false" aria-controls="p-age">Agenda<span class="count" id="cnt-age"></span></button>
     <button role="tab" id="tab-cli" aria-selected="false" aria-controls="p-cli">Clienti<span class="count" id="cnt-cli"></span></button>
     <button role="tab" id="tab-nda" aria-selected="false" aria-controls="p-nda">NDA<span class="count" id="cnt-nda"></span></button>
     <button role="tab" id="tab-scr" aria-selected="false" aria-controls="p-scr">Scrivi</button>
@@ -196,11 +198,40 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
           <button class="tile" data-go="tab-cli" type="button"><b id="n-risp">–</b><span>hanno risposto</span></button>
           <button class="tile" data-go="tab-col" type="button"><b id="n-col">–</b><span>concept in collezione</span></button>
         </div>
+        <div id="o-next"></div>
         <p class="note" id="o-upd"></p>
         <div class="jbox">
           <p class="eyebrow">JARVIS sull'iPad</p>
           <p class="note">In Safari tocca Condividi e poi “Aggiungi alla schermata Home”. L'app è tua: funziona senza Claude e senza consumare nulla.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AGENDA: solo gli appuntamenti -->
+  <section id="p-age" role="tabpanel" aria-labelledby="tab-age" hidden>
+    <div class="split">
+      <div>
+        <div class="filters" role="group" aria-label="Filtra agenda">
+          <button data-af="prossimi" aria-pressed="true">Prossimi</button>
+          <button data-af="passati" aria-pressed="false">Passati</button>
+        </div>
+        <div id="age-list" class="list"><div class="empty"><strong>Carico gli appuntamenti…</strong></div></div>
+      </div>
+      <div class="panel" id="age-detail">
+        <p class="eyebrow">Nuovo appuntamento</p>
+        <h2>Solo i giorni che contano</h2>
+        <div class="form">
+          <label class="f">Giorno<input type="date" id="a-giorno"></label>
+          <label class="f">Ora<input type="text" id="a-ora" placeholder="10:30 oppure mattina"></label>
+          <label class="f wide">Cosa<input type="text" id="a-titolo" placeholder="Caffè con…"></label>
+          <label class="f">Dove<input type="text" id="a-luogo" placeholder="Milano"></label>
+          <label class="f">Cliente<select id="a-cli"></select></label>
+          <label class="f">Stato<select id="a-stato"><option value="confermato">Confermato</option><option value="proposto">Proposto, aspetto conferma</option></select></label>
+          <label class="f wide">Note<textarea id="a-note" style="min-height:70px" placeholder="Cosa portare, cosa chiedere"></textarea></label>
+        </div>
+        <div class="btnrow"><button class="btn" id="a-add" type="button">Salva l'appuntamento</button></div>
+        <p class="err" id="a-err" hidden></p>
       </div>
     </div>
   </section>
@@ -396,26 +427,27 @@ $("logout").addEventListener("click",async()=>{await sb.auth.signOut();start();}
 sb.auth.onAuthStateChange(ev=>{if(ev==="SIGNED_OUT")start();});
 
 /* ---------- schede ---------- */
-const TABS=["oggi","cli","nda","scr","col","ric","soc","ask"];
+const TABS=["oggi","age","cli","nda","scr","col","ric","soc","ask"];
 function openTab(t){TABS.forEach(x=>{$("tab-"+x).setAttribute("aria-selected",x===t?"true":"false");$("p-"+x).hidden=x!==t;});try{localStorage.setItem("jv-tab",t)}catch(e){}}
 TABS.forEach(t=>$("tab-"+t).addEventListener("click",()=>openTab(t)));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>openTab(b.dataset.go.slice(4))));
 try{const h=location.hash.slice(1);const t=TABS.includes(h)?h:localStorage.getItem("jv-tab");if(TABS.includes(t))openTab(t);}catch(e){}
 
 /* ---------- dati ---------- */
-let oggi=null,clienti=[],collezione=[],ric=[],soc=[],nda=[];
+let oggi=null,clienti=[],collezione=[],ric=[],soc=[],nda=[],agenda=[];
 async function loadAll(){
   chip("","Aggiorno…");
-  const [b,c,k,r,j,m,n]=await Promise.all([
+  const [b,c,k,r,j,m,n,a]=await Promise.all([
     sb.from("app_bacheca").select("contenuto,aggiornato_at").eq("chiave","oggi").maybeSingle(),
     sb.from("app_clienti").select("*").order("data",{ascending:false}),
     sb.from("app_collezione").select("*").order("ordine"),
     sb.from("richieste").select("id,created_at,nome,email,telefono,paese,profilo,tipo,progetto,messaggio,canale_preferito,fonte,lingua,stato").order("created_at",{ascending:false}).limit(300),
     sb.from("jarvis_risposte").select("id,richiesta_id,stato,oggetto,testo,riassunto,motivo,errore,inviata_at").eq("canale","email"),
     sb.from("jarvis_messaggi").select("id,created_at,canale,contatto_id,contatto_nome,direzione,testo,stato,motivo,errore").order("created_at",{ascending:false}).limit(500),
-    sb.from("app_nda").select("*").order("creato_at",{ascending:false})
+    sb.from("app_nda").select("*").order("creato_at",{ascending:false}),
+    sb.from("app_agenda").select("*").order("giorno").order("ora")
   ]);
-  const errs=[b,c,k,r,j,m,n].filter(x=>x.error);
+  const errs=[b,c,k,r,j,m,n,a].filter(x=>x.error);
   if(errs.length){
     const msg=errs[0].error.message||"";
     if(/JWT|expired|auth/i.test(msg)){await sb.auth.signOut();return;}
@@ -425,8 +457,8 @@ async function loadAll(){
   clienti=c.data||[];collezione=k.data||[];
   const js=new Map((j.data||[]).map(x=>[x.richiesta_id,x]));
   ric=(r.data||[]).map(x=>({...x,j:js.get(x.id)||null}));
-  soc=m.data||[];nda=n.data||[];
-  renderOggi();renderClienti();renderNda();renderCol();renderRic();renderSoc();renderTiles();fillEmailClients();
+  soc=m.data||[];nda=n.data||[];agenda=a.data||[];
+  renderOggi();renderAgenda();renderClienti();renderNda();renderCol();renderRic();renderSoc();renderTiles();fillEmailClients();
   if(!c.data?.length&&!k.data?.length&&!errs.length)chip("bad","Nessun dato: l'accesso non è ancora attivo");
 }
 $("refresh").addEventListener("click",loadAll);
@@ -451,6 +483,7 @@ function renderTiles(){
   $("n-col").textContent=collezione.length;
   const na=nApprova();$("n-app").textContent=na;$("t-app").classList.toggle("att",na>0);
   const nr=ric.filter(r=>r.j&&r.j.stato==="da_approvare").length;$("cnt-ric").textContent=nr||"";$("f-approva").textContent=nr?`Da approvare (${nr})`:"Da approvare";
+  const na7=agenda.filter(x=>x.stato!=="annullato"&&x.stato!=="fatto"&&x.giorno>=oggiISO()&&x.giorno<=addDays(7)).length;$("cnt-age").textContent=na7||"";
   const nn=nda.filter(x=>x.stato==="bozza"||x.stato==="inviato").length;$("cnt-nda").textContent=nn||"";
   const ns=soc.filter(m=>m.direzione==="out"&&m.stato==="da_approvare").length;$("cnt-soc").textContent=ns||"";
 }
@@ -481,6 +514,11 @@ function renderCliDetail(){
       <div><dt>Chi contattare per email</dt><dd>${esc(c.chi||"da cercare")}</dd></div>
       <div><dt>Stato</dt><dd>${esc(CST[st]||st)}${c.aggiornato_at&&st!=="da_contattare"?" · "+esc(fmtDate(c.aggiornato_at)):""}</dd></div>
     </dl>
+    <div class="jbox"><p class="eyebrow">Contatti</p>
+      ${c.email||c.telefono?`<div class="btnrow">${c.email?`<a class="btn ghost" href="mailto:${esc(c.email)}">${esc(c.email)}</a>`:""}${c.telefono?`<a class="btn ghost" href="tel:${esc(c.telefono.replace(/[^\d+]/g,""))}">Chiama ${esc(c.telefono)}</a><a class="btn ghost" href="https://wa.me/${esc(c.telefono.replace(/\D/g,""))}" target="_blank" rel="noopener">WhatsApp</a>`:""}</div>`:`<p class="note">Nessun contatto salvato.</p>`}
+      <details><summary class="note" style="cursor:pointer">Modifica email e telefono</summary><div class="form" style="margin-top:10px"><label class="f">Email<input type="email" id="cl-email" value="${esc(c.email||"")}"></label><label class="f">Telefono<input type="text" id="cl-tel" value="${esc(c.telefono||"")}"></label></div><div class="btnrow" style="margin-top:10px"><button class="btn ghost" id="cl-ct-save" type="button">Salva contatti</button></div></details>
+      ${agenda.filter(x=>x.cliente_slug===c.slug&&x.stato!=="annullato"&&x.giorno>=oggiISO()).map(x=>`<p>Appuntamento: <strong style="font-weight:500">${esc(giornoLungo(x.giorno))}</strong>${x.ora?" · "+esc(x.ora):""}${x.stato==="proposto"?" (da confermare)":""}</p>`).join("")}
+      <div class="btnrow"><button class="btn ghost" id="cl-app" type="button">Aggiungi un appuntamento</button></div></div>
     ${c.perche?`<div><p class="eyebrow">Perché è adatto</p><p>${esc(c.perche)}</p></div>`:""}
     ${c.gancio?`<div><p class="eyebrow">Il gancio</p><p>${esc(c.gancio)}${link?` · <a href="${esc(link)}" target="_blank" rel="noopener">fonte</a>`:""}</p></div>`:""}
     ${c.messaggio?`<div class="jbox"><p class="eyebrow">${c.oggetto?"Email pronta":"Messaggio pronto"}${c.lingua&&c.lingua!=="it"?" ("+esc(c.lingua)+")":""}</p>
@@ -501,6 +539,10 @@ function renderCliDetail(){
     <p class="note">Segna “Contattato” solo dopo aver scritto tu (email o LinkedIn). JARVIS non invia niente.</p><p class="err" id="cl-err" hidden></p></div>`;
   const cp=$("cl-copy");if(cp)cp.addEventListener("click",e=>copyText(c.messaggio,e.currentTarget));
   const lc=$("li-copy");if(lc)lc.addEventListener("click",e=>copyText(c.li_messaggio,e.currentTarget));
+  $("cl-ct-save").addEventListener("click",async e=>{const em=$("cl-email").value.trim(),te=$("cl-tel").value.trim();
+    const {error}=await sb.from("app_clienti").update({email:em||null,telefono:te||null}).eq("slug",c.slug);
+    if(error){e.target.textContent="Non salvato, riprova";return;}c.email=em||null;c.telefono=te||null;renderCliDetail();});
+  $("cl-app").addEventListener("click",()=>{$("a-cli").value=c.slug;$("a-titolo").value="Appuntamento con "+c.nome;openTab("age");$("a-giorno").focus();});
   const cn=$("cl-nda");if(cn)cn.addEventListener("click",()=>{nCur=cn.dataset.id;nFilter="tutti";openTab("nda");renderNda();});
   const cnn=$("cl-nda-new");if(cnn)cnn.addEventListener("click",()=>newNda(c.slug));
   const ed=$("cl-edit");if(ed)ed.addEventListener("click",()=>{$("e-cli").value=c.slug;fromClient();openTab("scr");});
@@ -509,6 +551,68 @@ function renderCliDetail(){
     if(error){const er=$("cl-err");er.textContent="Non sono riuscito a salvare. Riprova.";er.hidden=false;b.disabled=false;return;}
     c.stato=b.dataset.cs;c.aggiornato_at=new Date().toISOString();renderClienti();renderTiles();}));
 }
+
+/* ---------- agenda ---------- */
+const AST={proposto:"Da confermare",confermato:"Confermato",fatto:"Fatto",annullato:"Annullato"};
+const pad=n=>String(n).padStart(2,"0");
+const oggiISO=()=>{const d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());};
+const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());};
+const giornoLungo=g=>{const d=new Date(g+"T12:00:00");return isNaN(d)?g:d.toLocaleDateString("it-IT",{weekday:"long",day:"numeric",month:"long"});};
+function traQuanto(g){const d=Math.round((new Date(g+"T12:00:00")-new Date(oggiISO()+"T12:00:00"))/864e5);
+  return d===0?"oggi":d===1?"domani":d>1?"tra "+d+" giorni":d===-1?"ieri":(-d)+" giorni fa";}
+let aFilter="prossimi";
+function renderAgenda(){
+  const today=oggiISO();
+  const L=agenda.filter(x=>aFilter==="prossimi"?(x.giorno>=today&&x.stato!=="fatto"&&x.stato!=="annullato"):(x.giorno<today||x.stato==="fatto"||x.stato==="annullato"));
+  if(aFilter==="passati")L.reverse();
+  $("age-list").innerHTML=L.length?L.map(x=>{const c=clienti.find(z=>z.slug===x.cliente_slug);return `<div class="jbox" style="margin:0 0 12px">
+    <p class="eyebrow">${esc(traQuanto(x.giorno))} · <span class="pill ag-${esc(x.stato)}">${esc(AST[x.stato])}</span></p>
+    <h3 style="font-family:var(--display);font-weight:400;font-size:24px;letter-spacing:.05em;margin:0;text-transform:capitalize">${esc(giornoLungo(x.giorno))}${x.ora?` · <span style="text-transform:none">${esc(x.ora)}</span>`:""}</h3>
+    <p style="margin:0">${esc(x.titolo)}${x.luogo?" · "+esc(x.luogo):""}</p>
+    ${x.note?`<p class="note">${esc(x.note)}</p>`:""}
+    <div class="btnrow">${x.stato==="proposto"?`<button class="btn" data-as="confermato" data-id="${esc(x.id)}" type="button">Confermato</button>`:""}
+      ${x.stato!=="fatto"?`<button class="btn ghost" data-as="fatto" data-id="${esc(x.id)}" type="button">Fatto</button>`:""}
+      ${x.stato!=="annullato"?`<button class="btn ghost" data-as="annullato" data-id="${esc(x.id)}" type="button">Annulla</button>`:""}
+      <button class="btn ghost" data-amove="${esc(x.id)}" type="button">Sposta</button>
+      <a class="btn ghost" href="${icsHref(x)}" download="appuntamento.ics">Nel calendario dell'iPad</a>
+      ${c?`<button class="btn ghost" data-acli="${esc(c.slug)}" type="button">Cliente</button>`:""}</div>
+    <div data-amovebox="${esc(x.id)}" hidden class="form"><label class="f">Nuovo giorno<input type="date" value="${esc(x.giorno)}"></label><label class="f">Ora<input type="text" value="${esc(x.ora||"")}"></label><div class="btnrow"><button class="btn" data-amovesave="${esc(x.id)}" type="button">Salva</button></div></div>
+  </div>`;}).join(""):`<div class="empty"><strong>${aFilter==="prossimi"?"Nessun appuntamento in arrivo":"Nessun appuntamento passato"}</strong>${aFilter==="prossimi"?"Quando fissi un incontro, aggiungilo qui a destra.":""}</div>`;
+  const set=async(id,upd)=>{upd.aggiornato_at=new Date().toISOString();const {error}=await sb.from("app_agenda").update(upd).eq("id",id);
+    if(error){alert("Non sono riuscito a salvare. Riprova.");return;}Object.assign(agenda.find(z=>z.id===id),upd);agenda.sort((p,q)=>(p.giorno+(p.ora||"")).localeCompare(q.giorno+(q.ora||"")));renderAgenda();renderOggiNext();renderTiles();};
+  $("age-list").querySelectorAll("[data-as]").forEach(b=>b.addEventListener("click",()=>set(b.dataset.id,{stato:b.dataset.as})));
+  $("age-list").querySelectorAll("[data-amove]").forEach(b=>b.addEventListener("click",()=>{const box=$("age-list").querySelector(`[data-amovebox="${CSS.escape(b.dataset.amove)}"]`);box.hidden=!box.hidden;}));
+  $("age-list").querySelectorAll("[data-amovesave]").forEach(b=>b.addEventListener("click",()=>{const box=b.closest("[data-amovebox]");const [g,o]=box.querySelectorAll("input");if(g.value)set(b.dataset.amovesave,{giorno:g.value,ora:o.value.trim()||null});}));
+  $("age-list").querySelectorAll("[data-acli]").forEach(b=>b.addEventListener("click",()=>{cCur=b.dataset.acli;cFilter="tutti";document.querySelectorAll("[data-cf]").forEach(z=>z.setAttribute("aria-pressed",z.dataset.cf==="tutti"?"true":"false"));openTab("cli");renderClienti();}));
+  $("a-cli").innerHTML=`<option value="">— nessuno —</option>`+clienti.map(c=>`<option value="${esc(c.slug)}">${esc(c.nome)}</option>`).join("");
+  renderOggiNext();
+}
+function renderOggiNext(){
+  const nx=agenda.filter(x=>x.giorno>=oggiISO()&&x.stato!=="fatto"&&x.stato!=="annullato").slice(0,2);
+  $("o-next").innerHTML=nx.length?`<div class="jbox"><p class="eyebrow">Prossimi appuntamenti</p>${nx.map(x=>`<p style="margin:0"><strong style="font-weight:500;text-transform:capitalize">${esc(giornoLungo(x.giorno))}</strong>${x.ora?" · "+esc(x.ora):""} (${esc(traQuanto(x.giorno))})<br>${esc(x.titolo)}${x.stato==="proposto"?" · da confermare":""}</p>`).join("")}<div class="btnrow"><button class="btn ghost" type="button" id="o-age">Apri l'agenda</button></div></div>`:"";
+  const ob=$("o-age");if(ob)ob.addEventListener("click",()=>openTab("age"));
+}
+function icsHref(x){
+  const m=String(x.ora||"").match(/^(\d{1,2})[:.](\d{2})/);const g=x.giorno.replace(/-/g,"");
+  const escI=t=>String(t||"").replace(/\\/g,"\\\\").replace(/[,;]/g,m=>"\\"+m).replace(/\n/g,"\\n");
+  let start,end;
+  if(m){const h=pad(+m[1]),mi=m[2];start="DTSTART:"+g+"T"+h+mi+"00";const e=new Date(x.giorno+"T"+h+":"+mi+":00");e.setHours(e.getHours()+1);end="DTEND:"+e.getFullYear()+pad(e.getMonth()+1)+pad(e.getDate())+"T"+pad(e.getHours())+pad(e.getMinutes())+"00";}
+  else{start="DTSTART;VALUE=DATE:"+g;const e=new Date(x.giorno+"T12:00:00");e.setDate(e.getDate()+1);end="DTEND;VALUE=DATE:"+e.getFullYear()+pad(e.getMonth()+1)+pad(e.getDate());}
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Bonomelli Estate//JARVIS//IT","BEGIN:VEVENT","UID:"+x.id+"@bonomelliestate.com","DTSTAMP:"+new Date().toISOString().replace(/[-:]/g,"").slice(0,15)+"Z",start,end,
+    "SUMMARY:"+escI(x.titolo+(x.stato==="proposto"?" (da confermare)":"")),"LOCATION:"+escI(x.luogo),"DESCRIPTION:"+escI((x.ora&&!m?"Quando: "+x.ora+". ":"")+(x.note||"")),
+    "BEGIN:VALARM","TRIGGER:-PT2H","ACTION:DISPLAY","DESCRIPTION:Promemoria","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+  return "data:text/calendar;charset=utf-8,"+encodeURIComponent(ics);
+}
+document.querySelectorAll("[data-af]").forEach(b=>b.addEventListener("click",()=>{aFilter=b.dataset.af;
+  document.querySelectorAll("[data-af]").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));renderAgenda();}));
+$("a-add").addEventListener("click",async()=>{const er=$("a-err");er.hidden=true;
+  const g=$("a-giorno").value,t=$("a-titolo").value.trim();
+  if(!g||!t){er.textContent="Scrivi almeno il giorno e cosa.";er.hidden=false;return;}
+  const row={giorno:g,ora:$("a-ora").value.trim()||null,titolo:t,luogo:$("a-luogo").value.trim()||null,cliente_slug:$("a-cli").value||null,stato:$("a-stato").value,note:$("a-note").value.trim()||null};
+  const {data,error}=await sb.from("app_agenda").insert(row).select().single();
+  if(error){er.textContent="Non sono riuscito a salvare. Riprova.";er.hidden=false;return;}
+  agenda.push(data);agenda.sort((p,q)=>(p.giorno+(p.ora||"")).localeCompare(q.giorno+(q.ora||"")));
+  ["a-giorno","a-ora","a-titolo","a-luogo","a-note"].forEach(id=>$(id).value="");renderAgenda();renderTiles();});
 
 /* ---------- NDA ---------- */
 const NST={bozza:"Da inviare",inviato:"Inviato · in attesa",firmato:"Firmato",rifiutato:"Rifiutato"};
