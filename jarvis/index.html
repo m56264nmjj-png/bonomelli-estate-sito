@@ -460,11 +460,11 @@ function renderCliDetail(){
       <div class="btnrow"><button class="btn" id="cl-copy" type="button">Copia il testo</button>${mail?`<a class="btn ghost" href="${esc(mail)}">Apri nell'email</a>`:""}<button class="btn ghost" id="cl-edit" type="button">Modifica in Scrivi</button></div></div>`:""}
     <div class="jbox"><p class="eyebrow">LinkedIn</p>
       <p><strong style="font-weight:500">Chi:</strong> ${esc(c.li_persona||c.chi||"da cercare")}</p>
-      ${c.li_messaggio?`<blockquote>${esc(c.li_messaggio)}</blockquote><p class="note">${esc(c.li_messaggio.length)} caratteri: entra nella nota del collegamento (massimo 300).</p>`:""}
+      ${c.li_messaggio?`<blockquote>${esc(c.li_messaggio)}</blockquote>${st==="da_contattare"?`<p class="note">${esc(c.li_messaggio.length)} caratteri: entra nella nota del collegamento (massimo 300).</p>`:`<p class="note">Risposta pronta da incollare nella chat di LinkedIn.</p>`}`:""}
       <div class="btnrow">${c.li_messaggio?`<button class="btn" id="li-copy" type="button">Copia il messaggio</button>`:""}
         <a class="btn ghost" href="${esc(safeUrl(c.li_profilo)||("https://www.linkedin.com/search/results/people/?keywords="+encodeURIComponent(c.nome)))}" target="_blank" rel="noopener">Trova la persona</a>
         <a class="btn ghost" href="${esc(safeUrl(c.li_azienda)||("https://www.linkedin.com/search/results/companies/?keywords="+encodeURIComponent(c.nome)))}" target="_blank" rel="noopener">Pagina dell'azienda</a></div>
-      <p class="note">Su LinkedIn: apri il profilo, tocca Collegati, poi “Aggiungi una nota” e incolla il messaggio.</p></div>
+      ${st==="da_contattare"?`<p class="note">Su LinkedIn: apri il profilo, tocca Collegati, poi “Aggiungi una nota” e incolla il messaggio.</p>`:""}</div>
     <div><p class="eyebrow">Cosa è successo</p><div class="btnrow">${Object.keys(CST).map(s=>`<button class="btn ghost" data-cs="${s}" type="button" ${st===s?'aria-pressed="true" disabled':""}>${CST[s]}</button>`).join("")}</div>
     <p class="note">Segna “Contattato” solo dopo aver scritto tu (email o LinkedIn). JARVIS non invia niente.</p><p class="err" id="cl-err" hidden></p></div>`;
   const cp=$("cl-copy");if(cp)cp.addEventListener("click",e=>copyText(c.messaggio,e.currentTarget));
