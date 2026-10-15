@@ -332,3 +332,4 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,4.6vw,60px);l
 .nav-open .menu-btn .mc{display:inline}
 .enq{scroll-margin-top:110px}
 @media (max-width:420px){.mark{font-size:13px;letter-spacing:.18em}.bar-r{gap:8px}.lang button,.lang a{padding:7px 7px}}
+#serra .plates figure{display:flex;flex-direction:column}#serra .plates figure img{height:auto;flex:1 1 auto;min-height:0}#serra .plates figcaption{flex:none}
