@@ -1,9 +1,9 @@
 {
-  "versione": "2.1",
+  "versione": "2.2",
   "data": "15 ottobre 2026",
   "novita": [
-    "Password dimenticata? Ora puoi sceglierne una nuova da sola: tocca il tasto nella pagina di accesso e segui l'email.",
-    "Aggiornamenti come sull'App Store, con le novità di ogni versione.",
-    "Funziona anche su iPhone, con gli stessi dati dell'iPad."
+    "Nuovo tasto \"Cambia password\" in alto: scegli tu la tua password quando vuoi.",
+    "Password dimenticata? Nella pagina di accesso c'è il tasto per sceglierne una nuova.",
+    "Aggiornamenti come sull'App Store, con le novità di ogni versione."
   ]
 }

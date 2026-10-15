@@ -179,6 +179,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
     <div class="status" aria-live="polite">
       <span class="chip" id="st"><i></i>In collegamento…</span>
       <button class="btn ghost" id="refresh" type="button">↻ Aggiorna</button>
+      <button class="btn ghost" id="chpw" type="button">Cambia password</button>
       <button class="btn ghost" id="logout" type="button">Esci</button>
     </div>
   </header>
@@ -459,6 +460,7 @@ $("login-form").addEventListener("submit",async e=>{
   if(error){er.textContent=/invalid/i.test(error.message)?"Email o password non corrette.":"Non riesco a entrare: "+error.message;er.hidden=false;return;}
   $("l-pass").value="";start();
 });
+$("chpw").addEventListener("click",()=>{recupero=true;start();});
 $("logout").addEventListener("click",async()=>{await sb.auth.signOut();start();});
 sb.auth.onAuthStateChange(ev=>{if(ev==="PASSWORD_RECOVERY"){recupero=true;start();}else if(ev==="SIGNED_OUT")start();});
 /* password dimenticata: email con il link, poi nuova password */
@@ -1016,7 +1018,7 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="2.1";
+const APP_VERSION="2.2";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){
