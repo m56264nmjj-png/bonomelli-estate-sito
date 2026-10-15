@@ -1,6 +1,6 @@
 /* JARVIS: la app si apre anche senza rete (mostra l'ultima versione salvata).
    Prima prova la rete, poi la copia salvata. I dati del database non vengono salvati qui. */
-const CACHE = "jarvis-v7";
+const CACHE = "jarvis-v8";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "../fonts/cinzel.woff", "../fonts/worksans.woff"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== CACHE).map(x => caches.delete(x)))).then(() => self.clients.claim())); });
