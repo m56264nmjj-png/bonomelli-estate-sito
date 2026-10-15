@@ -185,7 +185,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
   <section id="p-oggi" role="tabpanel" aria-labelledby="tab-oggi">
     <div class="hero">
       <img src="../img/glicine-alto.webp" alt="La Serra dei Sogni, galleria vetrata a glicine">
-      <div class="hero-in"><p class="eyebrow" id="o-eyebrow">Oggi</p><h2 class="date" id="o-date">Buongiorno Brenda</h2></div>
+      <div class="hero-in"><p class="eyebrow" id="o-eyebrow">Oggi</p><h2 class="date" id="o-date">Buongiorno Brenda</h2><p class="eyebrow" style="margin-top:.4em">Serra dei Sogni · disegno registrato UE · EUIPO n. 015156041</p></div>
     </div>
     <div class="today">
       <div class="panel">
@@ -750,20 +750,24 @@ const FRASI={
   "serra-dei-sogni":{it:"gallerie vetrate ad archi in ferro brunito, con vetrate decorate a fiori.",en:"arched glass galleries in burnished iron, with flower-patterned glazing."},
   "labyrinthus":{it:"un labirinto di siepi con un tempietto neoclassico al centro, raggiunto passo dopo passo.",en:"a hedge labyrinth with a neoclassical temple at its heart, reached step by step."}
 };
+const REGISTRATI={
+  "serra-dei-sogni":{it:"La Serra dei Sogni è un disegno registrato nell'Unione Europea (EUIPO n. 015156041).",en:"The Dream Greenhouse is a registered European Union design (EUIPO no. 015156041)."}
+};
 const FIRMA="Brenda Bonomelli · Visual Concept Designer · Bonomelli Estate · studio@bonomelliestate.it · bonomelliestate.com";
 function buildEmail(){
   const lang=$("e-lang").value,nome=$("e-nome").value.trim()||"[Nome]",luogo=$("e-luogo").value.trim()||"[luogo]";
   const frase=$("e-frase").value.trim()||"[una frase sul loro luogo]";
   const k=collezione.find(x=>x.slug===$("e-concept").value);const conc=k?k.nome:"[CONCEPT]";const link=k&&safeUrl(k.pagina)?k.pagina:"";
   const perche=$("e-perche").value.trim();
+  const reg=REGISTRATI[$("e-concept").value];
   let ogg,t;
   if(lang==="en"){
     ogg="A concept for "+luogo;
-    t=`Dear ${nome},\n${frase}\nI am Brenda Bonomelli of Bonomelli Estate.\nVisual Concept Designer: I design and develop neoclassical pavilions reimagined for 2026, in stone and glass, by private commission.\nFor a place like yours I have in mind ${conc}: ${perche}\n${link?link+"\n":""}Should you wish to know more, simply reply and I will send you the private dossier.\nIf you would rather not receive further messages, please just let me know.\nKind regards,\n${FIRMA}`;
+    t=`Dear ${nome},\n${frase}\nI am Brenda Bonomelli of Bonomelli Estate.\nVisual Concept Designer: I design and develop neoclassical pavilions reimagined for 2026, in stone and glass, by private commission.\nFor a place like yours I have in mind ${conc}: ${perche}\n${link?link+"\n":""}${reg?reg.en+"\n":""}Should you wish to know more, simply reply and I will send you the private dossier.\nIf you would rather not receive further messages, please just let me know.\nKind regards,\n${FIRMA}`;
   }else{
     ogg="Un concept per "+luogo;
     const art=/^[AEIOU]/i.test(conc)?"ad":"a";
-    t=`Gentile ${nome},\n${frase}\nSono Brenda Bonomelli della Bonomelli Estate.\nVisual Concept Designer : disegno e sviluppo padiglioni neoclassici rivisitati in chiave 2026 , in pietra e vetro su commissione privata.\nPer un luogo come il vostro penso ${art} ${conc}: ${perche}\n${link?link+"\n":""}Qualora desiderasse approfondire, mi risponda e le invierò il dossier riservato.\nNel caso preferisse non ricevere altre comunicazioni, me lo dica pure.\nUn cordiale saluto,\n${FIRMA}`;
+    t=`Gentile ${nome},\n${frase}\nSono Brenda Bonomelli della Bonomelli Estate.\nVisual Concept Designer : disegno e sviluppo padiglioni neoclassici rivisitati in chiave 2026 , in pietra e vetro su commissione privata.\nPer un luogo come il vostro penso ${art} ${conc}: ${perche}\n${link?link+"\n":""}${reg?reg.it+"\n":""}Qualora desiderasse approfondire, mi risponda e le invierò il dossier riservato.\nNel caso preferisse non ricevere altre comunicazioni, me lo dica pure.\nUn cordiale saluto,\n${FIRMA}`;
   }
   $("e-ogg").textContent=ogg;$("e-out").value=t;updMail();
 }
