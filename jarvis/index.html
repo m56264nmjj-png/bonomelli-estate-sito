@@ -832,12 +832,35 @@ function renderColDetail(){
     ${p.modello?`<div class="stage" id="stage"><p class="hint">Trascina per girare · due dita per avvicinare</p></div>`:(p.immagine?`<img class="cover" src="${esc(p.immagine)}" alt="${esc(p.nome)}">`:"")}
     <dl class="facts">${p.cosa?`<div><dt>Cos'è</dt><dd>${esc(p.cosa)}</dd></div>`:""}${p.materiali?`<div><dt>Materiali</dt><dd>${esc(p.materiali)}</dd></div>`:""}${p.misure?`<div><dt>Misure</dt><dd>${esc(p.misure)}</dd></div>`:""}</dl>
     ${p.descrizione?`<p>${esc(p.descrizione)}</p>`:""}
-    ${imgs.length?`<div class="gallery">${imgs.map(u=>`<img src="${esc(u)}" alt="${esc(p.nome)}" loading="lazy">`).join("")}</div>`:""}`;
+    ${imgs.length?`<div class="gallery">${imgs.map(u=>`<img src="${esc(u)}" alt="${esc(p.nome)}" loading="lazy">`).join("")}</div>`:""}
+    <div class="jbox" id="doc-box"><p class="eyebrow">Dossier riservato</p><p class="note" id="doc-stato">Controllo…</p>
+      <div class="btnrow"><a class="btn" id="doc-apri" target="_blank" rel="noopener" hidden>Apri il dossier</a>
+      <label class="btn ghost" for="doc-file" id="doc-lbl">Carica il dossier (PDF)</label><input type="file" id="doc-file" accept="application/pdf" hidden></div></div>`;
   $("col-back").addEventListener("click",()=>{d.hidden=true;$("col-grid").hidden=false;window.jvStop3d&&window.jvStop3d();});
   const cl=$("col-link");if(cl)cl.addEventListener("click",e=>copyText(pg,e.currentTarget));
   const cm=$("col-mail");if(cm)cm.addEventListener("click",()=>{$("e-concept").value=p.slug;setPerche();openTab("scr");});
+  initDossier(p);
   $("col-grid").hidden=true;d.scrollIntoView({behavior:"smooth",block:"start"});
   if(p.modello&&window.jv3d)window.jv3d($("stage"),p.modello);
+}
+
+/* dossier riservato: cartella privata "documenti", si apre solo con l'accesso di Brenda */
+async function initDossier(p){
+  const nome="dossier-"+p.slug+".pdf",st=$("doc-stato"),a=$("doc-apri"),f=$("doc-file"),lbl=$("doc-lbl");
+  const bucket=sb.storage.from("documenti");
+  async function aggiorna(){
+    const {data}=await bucket.createSignedUrl(nome,3600);
+    if(data&&data.signedUrl){a.href=data.signedUrl;a.hidden=false;st.textContent="Pronto da aprire o da mandare a chi lo chiede.";lbl.textContent="Sostituisci il dossier";}
+    else{a.hidden=true;st.textContent="Non ancora caricato.";lbl.textContent="Carica il dossier (PDF)";}
+  }
+  f.addEventListener("change",async()=>{
+    const file=f.files&&f.files[0];if(!file)return;
+    st.textContent="Carico…";
+    const {error}=await bucket.upload(nome,file,{contentType:"application/pdf",upsert:true});
+    if(error){st.textContent="Non riesco a caricarlo: "+error.message;return;}
+    f.value="";await aggiorna();
+  });
+  await aggiorna();
 }
 
 /* ---------- richieste dal sito ---------- */
