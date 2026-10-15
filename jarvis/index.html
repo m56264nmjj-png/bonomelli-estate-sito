@@ -155,7 +155,21 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
     <label class="f">Password<input type="password" id="l-pass" autocomplete="current-password" required></label>
     <button class="btn" type="submit" id="l-go">Entra</button>
     <p class="err" id="l-err" hidden></p>
+    <button class="btn ghost" id="l-forgot" type="button">Password dimenticata?</button>
+    <p class="note" id="l-msg" hidden></p>
     <p class="note">Solo Brenda può entrare. La password la sceglie lei e resta salvata su questo iPad.</p>
+  </form>
+</div>
+
+<div class="login" id="reset" hidden>
+  <h1>JARVIS</h1>
+  <p class="eyebrow">Nuova password</p>
+  <div class="frieze" aria-hidden="true"></div>
+  <form class="panel" id="reset-form">
+    <label class="f">Nuova password (almeno 8 caratteri)<input type="password" id="r-p1" autocomplete="new-password" minlength="8" required></label>
+    <label class="f">Ripetila<input type="password" id="r-p2" autocomplete="new-password" minlength="8" required></label>
+    <button class="btn" type="submit" id="r-go">Salva la nuova password</button>
+    <p class="err" id="r-err" hidden></p>
   </form>
 </div>
 
@@ -430,7 +444,10 @@ if(!window.supabase){document.body.innerHTML='<div class="login"><h1>JARVIS</h1>
 const sb=window.supabase.createClient(URL_DB,KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:"jarvis-bonomelli"}});
 
 /* ---------- accesso ---------- */
+let recupero=/type=recovery/.test(location.hash);
 async function start(){
+  if(recupero){$("login").hidden=true;$("app").hidden=true;$("reset").hidden=false;return;}
+  $("reset").hidden=true;
   const {data:{session}}=await sb.auth.getSession();
   if(session){$("login").hidden=true;$("app").hidden=false;loadAll();}
   else{$("app").hidden=true;$("login").hidden=false;}
@@ -443,7 +460,27 @@ $("login-form").addEventListener("submit",async e=>{
   $("l-pass").value="";start();
 });
 $("logout").addEventListener("click",async()=>{await sb.auth.signOut();start();});
-sb.auth.onAuthStateChange(ev=>{if(ev==="SIGNED_OUT")start();});
+sb.auth.onAuthStateChange(ev=>{if(ev==="PASSWORD_RECOVERY"){recupero=true;start();}else if(ev==="SIGNED_OUT")start();});
+/* password dimenticata: email con il link, poi nuova password */
+$("l-forgot").addEventListener("click",async()=>{
+  const em=$("l-email").value.trim(),m=$("l-msg"),er=$("l-err");er.hidden=true;
+  if(!em){er.textContent="Scrivi prima la tua email.";er.hidden=false;return;}
+  $("l-forgot").disabled=true;
+  const {error}=await sb.auth.resetPasswordForEmail(em,{redirectTo:location.origin+location.pathname});
+  $("l-forgot").disabled=false;
+  if(error){er.textContent=/rate|seconds|limit/i.test(error.message)?"Hai già chiesto un'email da poco: aspetta qualche minuto e controlla la posta (anche Spam).":"Non riesco a mandare l'email: "+error.message;er.hidden=false;return;}
+  m.textContent="Ti ho mandato un'email a "+em+". Aprila da questo telefono o tablet e tocca il link: qui potrai scegliere la nuova password. Controlla anche lo Spam.";m.hidden=false;
+});
+$("reset-form").addEventListener("submit",async e=>{
+  e.preventDefault();const er=$("r-err");er.hidden=true;
+  const p1=$("r-p1").value,p2=$("r-p2").value;
+  if(p1.length<8){er.textContent="Serve almeno 8 caratteri.";er.hidden=false;return;}
+  if(p1!==p2){er.textContent="Le due password non sono uguali.";er.hidden=false;return;}
+  $("r-go").disabled=true;const {error}=await sb.auth.updateUser({password:p1});$("r-go").disabled=false;
+  if(error){er.textContent=/expired|invalid|session/i.test(error.message)?"Il link è scaduto: torna indietro e chiedi una nuova email.":"Non riesco a salvarla: "+error.message;er.hidden=false;return;}
+  $("r-p1").value=$("r-p2").value="";recupero=false;history.replaceState(null,"",location.pathname);
+  alert("Fatto: la nuova password è salvata. Usala anche sugli altri dispositivi.");start();
+});
 
 /* ---------- schede ---------- */
 const TABS=["oggi","age","cli","nda","for","scr","col","ric","soc","ask"];
@@ -979,7 +1016,7 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="2.0";
+const APP_VERSION="2.1";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){
