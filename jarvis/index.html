@@ -738,9 +738,10 @@ function renderNdaDetail(){
 /* ---------- fornitori ---------- */
 const FST={da_contattare:"Da contattare",contattato:"Contattato · in attesa",si:"Ha detto sì",no:"Preferisce di no"};
 let fCur=null;
+const fGrp=p=>p==="Da provare"?"Laboratori da provare per i prossimi pezzi":"Chi ha realizzato "+p;
 function renderFor(){
   const progetti=[...new Set(fornitori.map(x=>x.progetto))];
-  $("for-list").innerHTML=fornitori.length?progetti.map(p=>`<p class="eyebrow" style="margin:14px 0 6px">Chi ha realizzato ${esc(p)}</p>`+
+  $("for-list").innerHTML=fornitori.length?progetti.map(p=>`<p class="eyebrow" style="margin:14px 0 6px">${esc(fGrp(p))}</p>`+
     fornitori.filter(x=>x.progetto===p).map(x=>`<button class="row" data-id="${esc(x.id)}" aria-current="${fCur===x.id}">
     <span class="n">${esc(x.nome)}</span><span class="d">${esc(x.telefono||"")}</span>
     <span class="s"><span class="pill fo-${esc(x.stato)}">${esc(FST[x.stato]||x.stato)}</span> ${esc(x.lavoro||"")}</span></button>`).join("")).join("")
@@ -752,8 +753,8 @@ function renderFor(){
 function renderForDetail(){
   const x=fornitori.find(z=>z.id===fCur);if(!x)return;
   const tel=(x.telefono||"").replace(/[^\d+]/g,""),sito=safeUrl(x.sito);
-  $("for-detail").innerHTML=`<p class="eyebrow">Chi ha realizzato ${esc(x.progetto)}</p><h2>${esc(x.nome)}</h2>
-    <dl class="facts"><div><dt>Cosa ha fatto</dt><dd>${esc(x.lavoro||"–")}</dd></div>
+  $("for-detail").innerHTML=`<p class="eyebrow">${esc(fGrp(x.progetto))}</p><h2>${esc(x.nome)}</h2>
+    <dl class="facts"><div><dt>${x.progetto==="Da provare"?"Cosa fanno":"Cosa ha fatto"}</dt><dd>${esc(x.lavoro||"–")}</dd></div>
       ${x.persona?`<div><dt>Persone</dt><dd>${esc(x.persona)}</dd></div>`:""}
       <div><dt>Telefono</dt><dd>${esc(x.telefono||"–")}</dd></div><div><dt>Email</dt><dd>${esc(x.email||"non pubblicata")}</dd></div>
       <div><dt>Indirizzo</dt><dd>${esc(x.indirizzo||"–")}</dd></div>${x.orari?`<div><dt>Orari</dt><dd>${esc(x.orari)}</dd></div>`:""}
@@ -1018,7 +1019,7 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="2.2";
+const APP_VERSION="2.3";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){
