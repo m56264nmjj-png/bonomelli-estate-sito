@@ -791,8 +791,24 @@ const FRASI={
   "pav-magnolia":{it:"un emiciclo a tre cupole sul parterre, per orangerie e ricevimenti.",en:"a three-domed hemicycle on the parterre, for an orangery and receptions."},
   "pav-forestier":{it:"un padiglione nel bosco, con lampadari e una vasca di ninfee.",en:"a woodland pavilion with chandeliers and a water-lily pool."},
   "serra-dei-sogni":{it:"gallerie vetrate ad archi in ferro brunito, con vetrate decorate a fiori.",en:"arched glass galleries in burnished iron, with flower-patterned glazing."},
-  "labyrinthus":{it:"un labirinto di siepi con un tempietto neoclassico al centro, raggiunto passo dopo passo.",en:"a hedge labyrinth with a neoclassical temple at its heart, reached step by step."}
+  "labyrinthus":{it:"un labirinto di siepi con un tempietto neoclassico al centro, raggiunto passo dopo passo.",en:"a hedge labyrinth with a neoclassical temple at its heart, reached step by step."},
+  "convivio":{it:"un tavolino in ferro battuto a mano e travertino, già realizzato su ordinazione in Veneto con aziende partner.",en:"a low table in hand-forged wrought iron and travertine, already made to order in the Veneto with partner workshops."},
+  "cullae":{it:"una seduta incassata in travertino con tessili in lino, una stanza di pietra per saloni con grandi finestre ad arco.",en:"a sunken travertine seat with linen textiles, a room of stone for salons with tall arched windows."},
+  "saxum":{it:"un sistema di sedute monolitiche in travertino massello, con il nome inciso, pensato per logge e portici.",en:"a system of monolithic seats in solid travertine, with an engraved name, designed for loggias and porticoes."},
+  "onduum":{it:"una seduta in travertino massello dal profilo a onda, con cuscini in lino, per corti e chiostri.",en:"a solid travertine seat with a wave-like profile and linen cushions, for courtyards and cloisters."},
+  "aeternum":{it:"una poltrona scolpita in un unico blocco di travertino, con una fioriera nello schienale, per giardini e viali.",en:"an armchair carved from a single block of travertine, with a planter in its back, for gardens and avenues."},
+  "corolla":{it:"una poltrona in velluto verde e pietra naturale, con lo schienale a petali, in tre versioni.",en:"an armchair in green velvet and natural stone, with a petal-shaped back, in three versions."},
+  "aether":{it:"librerie in travertino con ante in vetro, profili in bronzo e luce calda nei ripiani, per biblioteche e saloni.",en:"travertine bookcases with glass doors, bronze profiles and warm light in the shelves, for libraries and salons."},
+  "hortus":{it:"un tavolo rotondo in travertino scanalato con un piccolo giardino minerale sotto il vetro, per corti e terrazze.",en:"a round fluted travertine table with a small mineral garden beneath the glass, for courtyards and terraces."},
+  "lympha":{it:"un tavolo rotondo in travertino scanalato con un terrario vivo sotto una campana di vetro, per logge e giardini d'inverno.",en:"a round fluted travertine table with a living terrarium under a glass bell, for loggias and winter gardens."}
 };
+const ARREDI=["convivio","cullae","saxum","onduum","aeternum","corolla","aether","hortus","lympha"];
+const COSA={
+  pad:{it:"Visual Concept Designer : disegno e sviluppo padiglioni neoclassici rivisitati in chiave 2026 , in pietra e vetro su commissione privata.",en:"Visual Concept Designer: I design and develop neoclassical pavilions reimagined for 2026, in stone and glass, by private commission."},
+  arr:{it:"Visual Concept Designer : disegno e sviluppo arredi in pietra naturale e padiglioni neoclassici rivisitati in chiave 2026 , su commissione privata.",en:"Visual Concept Designer: I design and develop natural-stone furniture and neoclassical pavilions reimagined for 2026, by private commission."}
+};
+/* gli arredi stanno tutti in arredi.html: il link porta dritto al pezzo */
+function conceptLink(k){if(!k||!safeUrl(k.pagina))return "";return ARREDI.includes(k.slug)&&/arredi\.html$/.test(k.pagina)?k.pagina+"#"+k.slug:k.pagina;}
 const REGISTRATI={
   "serra-dei-sogni":{it:"La Serra dei Sogni è un disegno registrato nell'Unione Europea (EUIPO n. 015156041).",en:"The Dream Greenhouse is a registered European Union design (EUIPO no. 015156041)."}
 };
@@ -800,17 +816,18 @@ const FIRMA="Brenda Bonomelli · Visual Concept Designer · Bonomelli Estate · 
 function buildEmail(){
   const lang=$("e-lang").value,nome=$("e-nome").value.trim()||"[Nome]",luogo=$("e-luogo").value.trim()||"[luogo]";
   const frase=$("e-frase").value.trim()||"[una frase sul loro luogo]";
-  const k=collezione.find(x=>x.slug===$("e-concept").value);const conc=k?k.nome:"[CONCEPT]";const link=k&&safeUrl(k.pagina)?k.pagina:"";
+  const k=collezione.find(x=>x.slug===$("e-concept").value);const conc=k?k.nome:"[CONCEPT]";const link=conceptLink(k);
+  const cosa=COSA[ARREDI.includes($("e-concept").value)?"arr":"pad"];
   const perche=$("e-perche").value.trim();
   const reg=REGISTRATI[$("e-concept").value];
   let ogg,t;
   if(lang==="en"){
     ogg="A concept for "+luogo;
-    t=`Dear ${nome},\n${frase}\nI am Brenda Bonomelli of Bonomelli Estate.\nVisual Concept Designer: I design and develop neoclassical pavilions reimagined for 2026, in stone and glass, by private commission.\nFor a place like yours I have in mind ${conc}: ${perche}\n${link?link+"\n":""}${reg?reg.en+"\n":""}Should you wish to know more, simply reply and I will send you the private dossier.\nIf you would rather not receive further messages, please just let me know.\nKind regards,\n${FIRMA}`;
+    t=`Dear ${nome},\n${frase}\nI am Brenda Bonomelli of Bonomelli Estate.\n${cosa.en}\nFor a place like yours I have in mind ${conc}: ${perche}\n${link?link+"\n":""}${reg?reg.en+"\n":""}Should you wish to know more, simply reply and I will send you the private dossier.\nIf you would rather not receive further messages, please just let me know.\nKind regards,\n${FIRMA}`;
   }else{
     ogg="Un concept per "+luogo;
     const art=/^[AEIOU]/i.test(conc)?"ad":"a";
-    t=`Gentile ${nome},\n${frase}\nSono Brenda Bonomelli della Bonomelli Estate.\nVisual Concept Designer : disegno e sviluppo padiglioni neoclassici rivisitati in chiave 2026 , in pietra e vetro su commissione privata.\nPer un luogo come il vostro penso ${art} ${conc}: ${perche}\n${link?link+"\n":""}${reg?reg.it+"\n":""}Qualora desiderasse approfondire, mi risponda e le invierò il dossier riservato.\nNel caso preferisse non ricevere altre comunicazioni, me lo dica pure.\nUn cordiale saluto,\n${FIRMA}`;
+    t=`Gentile ${nome},\n${frase}\nSono Brenda Bonomelli della Bonomelli Estate.\n${cosa.it}\nPer un luogo come il vostro penso ${art} ${conc}: ${perche}\n${link?link+"\n":""}${reg?reg.it+"\n":""}Qualora desiderasse approfondire, mi risponda e le invierò il dossier riservato.\nNel caso preferisse non ricevere altre comunicazioni, me lo dica pure.\nUn cordiale saluto,\n${FIRMA}`;
   }
   $("e-ogg").textContent=ogg;$("e-out").value=t;updMail();
 }
@@ -821,7 +838,8 @@ function fillEmailClients(){
   $("e-cli").innerHTML=`<option value="">— nessuno, scrivo io —</option>`+clienti.map(c=>`<option value="${esc(c.slug)}">${esc(c.nome)}</option>`).join("");
   $("e-cli").value=cur;
   const cc=$("e-concept").value;
-  $("e-concept").innerHTML=collezione.filter(x=>FRASI[x.slug]).map(x=>`<option value="${esc(x.slug)}">${esc(x.nome)}</option>`).join("");
+  const opt=x=>`<option value="${esc(x.slug)}">${esc(x.nome)}</option>`,conFrase=collezione.filter(x=>FRASI[x.slug]);
+  $("e-concept").innerHTML=`<optgroup label="Padiglioni e serre">${conFrase.filter(x=>!ARREDI.includes(x.slug)).map(opt).join("")}</optgroup><optgroup label="Arredi in pietra">${conFrase.filter(x=>ARREDI.includes(x.slug)).map(opt).join("")}</optgroup>`;
   if(cc)$("e-concept").value=cc;else{$("e-concept").value="pav-rome";}
   if(!$("e-perche").value)setPerche();else buildEmail();
 }
@@ -841,8 +859,8 @@ $("e-copy-ogg").addEventListener("click",e=>copyText($("e-ogg").textContent,e.cu
 /* ---------- scrivi: risposte pronte ---------- */
 const RISP={
   prezzo:{l:"Chiede subito il prezzo",
-    it:n=>`Gentile ${n},\nla ringrazio per l'interesse.\nOgni padiglione nasce su commissione e su misura: il prezzo si definisce con un preventivo dettagliato, dopo il concept pensato per il suo luogo.\nPer prepararlo mi servono poche informazioni: dove si trova, le dimensioni dello spazio, l'uso che immagina e i tempi.\nSe preferisce, possiamo sentirci per una breve chiamata.\nUn cordiale saluto,\n${FIRMA}`,
-    en:n=>`Dear ${n},\nthank you for your interest.\nEach pavilion is made by private commission and to measure: the price is defined in a detailed quotation, after a concept designed for your setting.\nTo prepare it I only need a few details: the location, the size of the space, the use you have in mind and your timing.\nIf you prefer, we could arrange a short call.\nKind regards,\n${FIRMA}`},
+    it:n=>`Gentile ${n},\nla ringrazio per l'interesse.\nOgni opera nasce su commissione e su misura: il prezzo si definisce con un preventivo dettagliato, dopo il concept pensato per il suo luogo.\nPer prepararlo mi servono poche informazioni: dove si trova, le dimensioni dello spazio, l'uso che immagina e i tempi.\nSe preferisce, possiamo sentirci per una breve chiamata.\nUn cordiale saluto,\n${FIRMA}`,
+    en:n=>`Dear ${n},\nthank you for your interest.\nEach piece is made by private commission and to measure: the price is defined in a detailed quotation, after a concept designed for your setting.\nTo prepare it I only need a few details: the location, the size of the space, the use you have in mind and your timing.\nIf you prefer, we could arrange a short call.\nKind regards,\n${FIRMA}`},
   dossier:{l:"Vuole il dossier",
     it:n=>`Gentile ${n},\ncon piacere. Le invio il dossier riservato con schede, misure e varianti.\nLe chiedo cortesemente di considerarlo personale: i concept sono opere originali dello studio.\nResto a disposizione per qualsiasi domanda o per una breve chiamata.\nUn cordiale saluto,\n${FIRMA}`,
     en:n=>`Dear ${n},\nwith pleasure. Please find the private dossier with drawings, dimensions and variants.\nI kindly ask you to keep it personal: the concepts are original works of the studio.\nI remain at your disposal for any question or a short call.\nKind regards,\n${FIRMA}`},
@@ -1001,7 +1019,7 @@ const ANS={
     return r.length?"Hanno risposto: "+r.map(c=>c.nome+" ("+CST[c.stato]+")").join(", ")+".":"Per ora nessuno ha risposto. Ricorda di segnarlo in Clienti quando succede.";},
   attesa:()=>{const r=clienti.filter(c=>c.stato==="inviato"&&days(c.aggiornato_at)>=10);
     return r.length?"Da ricontattare: "+r.map(c=>c.nome+" ("+days(c.aggiornato_at)+" giorni)").join(", ")+". In Scrivi trovi la risposta pronta “Nessuna risposta dopo 10 giorni”.":"Nessuno aspetta da più di 10 giorni.";},
-  prezzo:()=>"Non dare un numero. Spiega che ogni padiglione è su misura e che il prezzo arriva con il preventivo dopo il concept. Chiedi luogo, dimensioni, uso e tempi. La risposta pronta è in Scrivi → “Chiede subito il prezzo”."
+  prezzo:()=>"Non dare un numero. Spiega che ogni opera (padiglione o arredo) è su misura e che il prezzo arriva con il preventivo dopo il concept. Chiedi luogo, dimensioni, uso e tempi. La risposta pronta è in Scrivi → “Chiede subito il prezzo”."
 };
 $("suggest").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>say(b.textContent,ANS[b.dataset.q]())));
 $("c-claude").addEventListener("click",async e=>{
@@ -1019,7 +1037,7 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="2.3";
+const APP_VERSION="2.4";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){

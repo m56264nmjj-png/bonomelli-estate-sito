@@ -1,7 +1,8 @@
 {
-  "versione": "2.3",
-  "data": "15 ottobre 2026",
+  "versione": "2.4",
+  "data": "17 ottobre 2026",
   "novita": [
-    "Fornitori: nuovo gruppo \"Laboratori da provare\", con Oggetti & Soggetti (plexiglas e luci, San Giovanni Lupatoto)."
+    "Scrivi: ora puoi proporre anche gli arredi in pietra (CONVIVIO, CULLAE, SAXUM, ONDUUM, AETERNUM, COROLLA, AETHER, HORTUS, LYMPHA), non solo padiglioni e serre.",
+    "Con un arredo, l'email presenta \"arredi in pietra naturale e padiglioni\" e il link porta dritto al pezzo sul sito."
   ]
 }
