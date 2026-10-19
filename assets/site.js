@@ -53,8 +53,8 @@
   });
 
 
-  /* enquiry form -> Supabase */
-  var SB='https://klxcmojwmjilklfoqzhp.supabase.co',KEY='sb_publishable_ft-DNpTfQMfHfw08NEvsPg_nIsqkiHR';
+  /* enquiry form -> funzione sul server (nessuna chiave nel sito) */
+  var MODULO='https://klxcmojwmjilklfoqzhp.supabase.co/functions/v1/modulo-contatti';
   /* mobile menu */
   var mb=document.getElementById('menu-btn');
   if(mb){mb.addEventListener('click',function(){var o=root.classList.toggle('nav-open');mb.setAttribute('aria-expanded',o?'true':'false');document.body.style.overflow=o?'hidden':''});
@@ -72,7 +72,7 @@
     if(v('f-web')){st.classList.add('ok');st.textContent=T('Grazie.','Thank you.');return}
     var data={nome:v('f-nome'),email:v('f-email'),telefono:v('f-tel')||null,paese:v('f-paese')||null,tipo:v('f-tipo'),profilo:v('f-profilo')||null,progetto:v('f-progetto')||null,canale_preferito:v('f-canale')||null,fonte:v('f-fonte')||null,messaggio:v('f-msg')||null,lingua:root.lang==='en'?'en':'it',consenso_privacy:true};
     btn.disabled=true;st.textContent=T('Invio in corso…','Sending…');
-    fetch(SB+'/rest/v1/richieste',{method:'POST',headers:{'apikey':KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(data)})
+    fetch(MODULO,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
     .then(function(r){if(!r.ok)throw new Error(r.status);form.reset();st.classList.add('ok');st.textContent=T('Grazie. La sua richiesta è arrivata allo studio: le risponderemo personalmente.','Thank you. Your enquiry has reached the studio: we will reply to you personally.')})
     .catch(function(){st.classList.add('err');st.textContent=T('Non è stato possibile inviare la richiesta. Scriva a studio@bonomelliestate.it o su WhatsApp al +39 351 657 5517.','Your enquiry could not be sent. Please write to studio@bonomelliestate.it or on WhatsApp at +39 351 657 5517.')})
     .finally(function(){btn.disabled=false});
