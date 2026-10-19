@@ -73,7 +73,7 @@ a{color:var(--brass)}
 .pill.ag-proposto{color:var(--warn)} .pill.ag-confermato{color:var(--ok)} .pill.ag-fatto{color:var(--muted)} .pill.ag-annullato{color:var(--bad)}
 .pill.fo-da_contattare{color:var(--warn)} .pill.fo-contattato{color:var(--brass)} .pill.fo-si{color:var(--ok)} .pill.fo-no{color:var(--bad)}
 .pill.nda-bozza{color:var(--warn)} .pill.nda-inviato{color:var(--brass)} .pill.nda-firmato{color:var(--ok)} .pill.nda-rifiutato{color:var(--bad)}
-.pill.st-da_contattare{color:var(--warn)} .pill.st-inviato{color:var(--brass)} .pill.st-risposta,.pill.st-trattativa{color:var(--ok)} .pill.st-chiuso{color:var(--muted)}
+.pill.st-da_contattare{color:var(--warn)} .pill.st-inviato{color:var(--brass)} .pill.st-risposta,.pill.st-trattativa{color:var(--ok)} .pill.st-chiuso{color:var(--muted)} .pill.st-ric{color:var(--warn);font-weight:500}
 .jbox{border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:10px}
 .panel{background:var(--panel);border-top:1px solid var(--line);padding:24px;display:flex;flex-direction:column;gap:18px;min-width:0}
 .panel h2{font-family:var(--display);font-weight:400;font-size:clamp(22px,3vw,30px);letter-spacing:.05em;line-height:1.15;margin:0}
@@ -221,6 +221,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
           <button class="tile" data-go="tab-cli" type="button"><b id="n-risp">–</b><span>hanno risposto</span></button>
           <button class="tile" data-go="tab-col" type="button"><b id="n-col">–</b><span>concept in collezione</span></button>
         </div>
+        <div id="o-ric"></div>
         <div id="o-next"></div>
         <p class="note" id="o-upd"></p>
         <div class="jbox">
@@ -266,6 +267,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
         <div class="filters" role="group" aria-label="Filtra clienti">
           <button data-cf="da_contattare" aria-pressed="true">Da contattare</button>
           <button data-cf="in_corso" aria-pressed="false">In corso</button>
+          <button data-cf="ricontattare" aria-pressed="false" id="f-ric">Da ricontattare</button>
           <button data-cf="tutti" aria-pressed="false">Tutti</button>
         </div>
         <div class="list" id="cli-list"><div class="empty"><strong>Carico i clienti…</strong></div></div>
@@ -433,6 +435,11 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const safeUrl=u=>/^https:\/\//i.test(String(u||""))?String(u):"";
 const fmtDate=iso=>{const d=new Date(iso);return isNaN(d)?"":d.toLocaleString("it-IT",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});};
 const days=iso=>{const d=new Date(iso);return isNaN(d)?0:Math.floor((Date.now()-d)/864e5);};
+const ATTESA=10;
+const gInvio=c=>c.inviato_at?days(c.inviato_at):null;
+const fmtGiorno=iso=>{const d=new Date(iso);return isNaN(d)?"":d.toLocaleDateString("it-IT",{day:"numeric",month:"short"});};
+const daRicontattare=()=>clienti.filter(c=>c.stato==="inviato"&&c.inviato_at&&days(c.inviato_at)>=ATTESA).sort((a,b)=>new Date(a.inviato_at)-new Date(b.inviato_at));
+const attesaTxt=c=>{const g=gInvio(c);if(g===null)return "";return "inviato il "+fmtGiorno(c.inviato_at)+" · "+(g===0?"oggi":g===1?"1 giorno":g+" giorni");};
 const CST={da_contattare:"Da contattare",inviato:"Contattato",risposta:"Ha risposto",trattativa:"In trattativa",chiuso:"Chiuso"};
 const JLBL={in_lavorazione:"in preparazione",inviata:"risposta inviata",da_approvare:"da approvare",approvata:"in invio",scartata:"scartata",errore:"errore"};
 const LBL={tipo:{consulenza:"Consulenza privata",dossier:"Dossier riservato",collaborazione:"Collaborazione",altro:"Altro"},
@@ -549,18 +556,21 @@ function renderTiles(){
   const nn=nda.filter(x=>x.stato==="bozza"||x.stato==="inviato").length;$("cnt-nda").textContent=nn||"";
   const nf=fornitori.filter(x=>x.stato==="da_contattare").length;$("cnt-for").textContent=nf||"";
   const ns=soc.filter(m=>m.direzione==="out"&&m.stato==="da_approvare").length;$("cnt-soc").textContent=ns||"";
+  const rr=daRicontattare();$("f-ric").textContent=rr.length?`Da ricontattare (${rr.length})`:"Da ricontattare";
+  $("o-ric").innerHTML=rr.length?`<div class="jbox"><p class="eyebrow">⏰ Da ricontattare · ${ATTESA} giorni senza risposta</p>${rr.slice(0,5).map(c=>`<p style="margin:0">${esc(c.nome)} · ${esc(attesaTxt(c))}</p>`).join("")}${rr.length>5?`<p class="note">e altri ${rr.length-5}</p>`:""}<div class="btnrow"><button class="btn ghost" type="button" id="o-ricbtn">Apri la lista</button></div></div>`:"";
+  const orb=$("o-ricbtn");if(orb)orb.addEventListener("click",()=>{cFilter="ricontattare";document.querySelectorAll("[data-cf]").forEach(z=>z.setAttribute("aria-pressed",z.dataset.cf==="ricontattare"?"true":"false"));openTab("cli");renderClienti();});
 }
 
 /* ---------- clienti ---------- */
 let cFilter="da_contattare",cCur=null;
 function renderClienti(){
   const inCorso=["inviato","risposta","trattativa"];
-  const L=clienti.filter(c=>{const s=c.stato||"da_contattare";return cFilter==="tutti"||(cFilter==="in_corso"?inCorso.includes(s):s===cFilter);})
+  const L=cFilter==="ricontattare"?daRicontattare():clienti.filter(c=>{const s=c.stato||"da_contattare";return cFilter==="tutti"||(cFilter==="in_corso"?inCorso.includes(s):s===cFilter);})
     .sort((a,b)=>String(a.classe||"C").localeCompare(String(b.classe||"C"))||String(b.data||"").localeCompare(String(a.data||"")));
-  if(!L.length){$("cli-list").innerHTML=`<div class="empty"><strong>${clienti.length?"Nessun cliente in questa lista":"Ancora nessun cliente"}</strong>${clienti.length?"Prova un altro filtro.":"Il Cacciatore li aggiunge ogni mattina, dal lunedì al sabato."}</div>`;return;}
+  if(!L.length){$("cli-list").innerHTML=`<div class="empty"><strong>${cFilter==="ricontattare"?"Nessuno da ricontattare":clienti.length?"Nessun cliente in questa lista":"Ancora nessun cliente"}</strong>${clienti.length?"Prova un altro filtro.":"Il Cacciatore li aggiunge ogni mattina, dal lunedì al sabato."}</div>`;return;}
   $("cli-list").innerHTML=L.map(c=>`<button class="row" data-id="${esc(c.slug)}" aria-current="${cCur===c.slug}">
     <span class="n">${esc(c.nome)}</span><span class="d">${esc(c.data||"")}</span>
-    <span class="s"><span class="pill cl-${esc(c.classe||"C")}">Classe ${esc(c.classe||"C")}</span> <span class="pill st-${esc(c.stato||"da_contattare")}">${esc(CST[c.stato||"da_contattare"]||c.stato)}</span> ${esc(c.luogo||"")}</span></button>`).join("");
+    <span class="s"><span class="pill cl-${esc(c.classe||"C")}">Classe ${esc(c.classe||"C")}</span> <span class="pill st-${esc(c.stato||"da_contattare")}">${esc(CST[c.stato||"da_contattare"]||c.stato)}</span>${c.stato==="inviato"&&c.inviato_at?` <span class="pill${gInvio(c)>=ATTESA?" st-ric":""}">${gInvio(c)>=ATTESA?"⏰ ":""}${esc(attesaTxt(c))}</span>`:""} ${esc(c.luogo||"")}</span></button>`).join("");
   $("cli-list").querySelectorAll(".row").forEach(b=>b.addEventListener("click",()=>{cCur=b.dataset.id;renderClienti();
     if(matchMedia("(max-width:820px)").matches)$("cli-detail").scrollIntoView({behavior:"smooth",block:"start"});}));
   if(cCur)renderCliDetail();
@@ -576,6 +586,7 @@ function renderCliDetail(){
       ${c.luogo?`<div><dt>Dove</dt><dd>${esc(c.luogo)}</dd></div>`:""}
       <div><dt>Chi contattare per email</dt><dd>${esc(c.chi||"da cercare")}</dd></div>
       <div><dt>Stato</dt><dd>${esc(CST[st]||st)}${c.aggiornato_at&&st!=="da_contattare"?" · "+esc(fmtDate(c.aggiornato_at)):""}</dd></div>
+      ${c.inviato_at&&st!=="da_contattare"?`<div><dt>Primo contatto</dt><dd>${esc(attesaTxt(c))}${st==="inviato"?(gInvio(c)>=ATTESA?" · <strong style=\"font-weight:500;color:var(--warn)\">⏰ da ricontattare</strong>":" · da ricontattare dal "+esc(fmtGiorno(new Date(new Date(c.inviato_at).getTime()+ATTESA*864e5).toISOString()))):""}</dd></div>`:""}
     </dl>
     <div class="jbox"><p class="eyebrow">Contatti</p>
       ${c.email||c.telefono?`<div class="btnrow">${c.email?`<a class="btn ghost" href="mailto:${esc(c.email)}">${esc(c.email)}</a>`:""}${c.telefono?`<a class="btn ghost" href="tel:${esc(c.telefono.replace(/[^\d+]/g,""))}">Chiama ${esc(c.telefono)}</a><a class="btn ghost" href="https://wa.me/${esc(c.telefono.replace(/\D/g,""))}" target="_blank" rel="noopener">WhatsApp</a>`:""}</div>`:`<p class="note">Nessun contatto salvato.</p>`}
@@ -612,7 +623,7 @@ function renderCliDetail(){
   $("cli-detail").querySelectorAll("[data-cs]").forEach(b=>b.addEventListener("click",async()=>{
     b.disabled=true;const {error}=await sb.from("app_clienti").update({stato:b.dataset.cs,aggiornato_at:new Date().toISOString()}).eq("slug",c.slug);
     if(error){const er=$("cl-err");er.textContent="Non sono riuscito a salvare. Riprova.";er.hidden=false;b.disabled=false;return;}
-    c.stato=b.dataset.cs;c.aggiornato_at=new Date().toISOString();renderClienti();renderTiles();}));
+    if(b.dataset.cs==="inviato"&&c.stato!=="inviato")c.inviato_at=new Date().toISOString();c.stato=b.dataset.cs;c.aggiornato_at=new Date().toISOString();renderClienti();renderTiles();}));
 }
 
 /* ---------- agenda ---------- */
@@ -1020,8 +1031,8 @@ const ANS={
     return t.trim()||"Oggi non ho ancora le priorità. Arrivano alle 7:52.";},
   risposte:()=>{const r=clienti.filter(c=>["risposta","trattativa"].includes(c.stato));
     return r.length?"Hanno risposto: "+r.map(c=>c.nome+" ("+CST[c.stato]+")").join(", ")+".":"Per ora nessuno ha risposto. Ricorda di segnarlo in Clienti quando succede.";},
-  attesa:()=>{const r=clienti.filter(c=>c.stato==="inviato"&&days(c.aggiornato_at)>=10);
-    return r.length?"Da ricontattare: "+r.map(c=>c.nome+" ("+days(c.aggiornato_at)+" giorni)").join(", ")+". In Scrivi trovi la risposta pronta “Nessuna risposta dopo 10 giorni”.":"Nessuno aspetta da più di 10 giorni.";},
+  attesa:()=>{const r=daRicontattare();
+    return r.length?"Da ricontattare: "+r.map(c=>c.nome+" ("+gInvio(c)+" giorni)").join(", ")+". In Scrivi trovi la risposta pronta “Nessuna risposta dopo 10 giorni”.":"Nessuno aspetta da più di 10 giorni.";},
   prezzo:()=>"Non dare un numero. Spiega che ogni opera (padiglione o arredo) è su misura e che il prezzo arriva con il preventivo dopo il concept. Chiedi luogo, dimensioni, uso e tempi. La risposta pronta è in Scrivi → “Chiede subito il prezzo”."
 };
 $("suggest").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>say(b.textContent,ANS[b.dataset.q]())));
@@ -1040,7 +1051,7 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="2.5";
+const APP_VERSION="2.6";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){

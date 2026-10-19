@@ -1,8 +1,8 @@
 {
-  "versione": "2.5",
-  "data": "17 ottobre 2026",
+  "versione": "2.6",
+  "data": "19 ottobre 2026",
   "novita": [
-    "Il logo BE di Bonomelli Estate ora è l'icona dell'app e compare in alto accanto a JARVIS.",
-    "Per vedere la nuova icona sulla schermata Home: tieni premuta la vecchia icona, Rimuovi app, poi riapri bonomelliestate.com/jarvis/ in Safari e Aggiungi alla schermata Home."
+    "Ogni cliente contattato mostra quando è partita l'email e quanti giorni sono passati.",
+    "Dopo 10 giorni senza risposta compare ⏰ e il cliente finisce nella nuova lista \"Da ricontattare\", anche nella Home."
   ]
 }
