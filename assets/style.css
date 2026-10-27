@@ -340,3 +340,5 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,4.6vw,60px);l
 .rev p:first-child{color:var(--bronze);letter-spacing:.15em}
 .rev footer{font-size:14px;color:var(--stone);opacity:.75}
 #rec-list{margin:24px 0 40px}
+
+.pv-sub{display:block;font-family:inherit;font-size:clamp(15px,1.6vw,19px);letter-spacing:.06em;text-transform:none;line-height:1.4;margin-top:12px;color:var(--stone);opacity:.85}

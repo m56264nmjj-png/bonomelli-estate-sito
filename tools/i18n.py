@@ -14,7 +14,7 @@ PAGES = {
     },
     "padiglioni.html": {
         "en": "pavilions.html",
-        "it_title": "Padiglioni da giardino in pietra: tempietti, rotonde e orangerie · Bonomelli Estate",
+        "it_title": "Padiglioni e gazebo da giardino in pietra: tempietti neoclassici, rotonde e orangerie · Bonomelli Estate",
         "en_title": "Stone garden pavilions: temples, rotundas and orangeries · Bonomelli Estate",
         "it_desc": "Padiglioni neoclassici modulari in pietra naturale per parchi di ville, tenute e hotel: Bonomelli, Caelo, Magnolia, Rome, D’Hier, Forestier, Air Frais. Travertino o breccia sarda, ferro battuto a mano, vetro temperato.",
         "en_desc": "Modular neoclassical pavilions in natural stone for the parks of villas, estates and hotels: Bonomelli, Caelo, Magnolia, Rome, D’Hier, Forestier, Air Frais. Travertine or Sardinian breccia, hand-forged iron, tempered glass.",
@@ -70,8 +70,8 @@ PAGES = {
     },
     "serra-dei-sogni.html": {
         "en": "dream-greenhouse.html",
-        "it_title": "Serra dei Sogni, galleria vetrata in ferro e vetro con mosaico Via Florae · Bonomelli Estate",
-        "en_title": "Dream Greenhouse, an iron and glass garden gallery with Via Florae mosaic · Bonomelli Estate",
+        "it_title": "Serra in ferro e vetro su misura · Serra dei Sogni, orangerie ad archi · Bonomelli Estate",
+        "en_title": "Bespoke iron and glass orangery from Italy · The Dream Greenhouse · Bonomelli Estate",
         "it_desc": "La Serra dei Sogni: galleria vetrata ad archi in ferro e vetro con pavimento a mosaico di ciottoli Via Florae, in quattro fiori: glicine, giglio, ortensia, girasole.",
         "en_desc": "The Dream Greenhouse: an arched iron and glass garden gallery with a Via Florae pebble mosaic floor, in four flowers: wisteria, lily, hydrangea, sunflower.",
     },
