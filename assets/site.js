@@ -4,6 +4,20 @@
   /* site root, from this script's own address (pages live at / and /en/) */
   var BASE=(document.currentScript&&document.currentScript.src||'').replace(/assets\/site\.js(\?.*)?$/,'');
   root.classList.add('js');
+  /* contatore delle visite: nessun cookie, nessuna chiave; Brenda (JARVIS su questo dispositivo) non viene contata */
+  (function(){
+    var CT='https://klxcmojwmjilklfoqzhp.supabase.co/functions/v1/contatore';
+    try{if(localStorage.getItem('be-noconto')==='1')return}catch(e){}
+    var s;try{s=sessionStorage.getItem('be-s');if(!s){s=Math.random().toString(36).slice(2)+Date.now().toString(36);sessionStorage.setItem('be-s',s)}}catch(e){s=Math.random().toString(36).slice(2)+Date.now().toString(36)}
+    var r='diretto',q=location.search.match(/[?&]utm_source=([^&]+)/);
+    if(q)r=decodeURIComponent(q[1]);else if(document.referrer){try{var h=new URL(document.referrer).hostname.replace(/^www\./,'');r=h==='bonomelliestate.com'?'sito':h}catch(e){}}
+    function send(b){return fetch(CT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b),keepalive:true})}
+    send({e:'vista',s:s,p:location.pathname,t:document.title,l:root.lang||'it',r:r}).then(function(x){return x.ok&&x.status===200?x.json():null}).then(function(d){
+      if(!d||!d.id)return;var n=0;
+      var iv=setInterval(function(){if(document.hidden)return;if(++n>120){clearInterval(iv);return}send({e:'segnale',s:s,id:d.id})},30000);
+      document.addEventListener('visibilitychange',function(){if(document.hidden)send({e:'segnale',s:s,id:d.id})});
+    }).catch(function(){});
+  })();
   /* header turns solid after the opening */
   var hd=document.querySelector('header');var isHome=!!document.getElementById('op-bg');
   function onScroll(){

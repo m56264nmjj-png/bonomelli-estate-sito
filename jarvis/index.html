@@ -221,6 +221,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
           <button class="tile" data-go="tab-cli" type="button"><b id="n-risp">–</b><span>hanno risposto</span></button>
           <button class="tile" data-go="tab-col" type="button"><b id="n-col">–</b><span>concept in collezione</span></button>
         </div>
+        <div id="o-live"></div>
         <div id="o-ric"></div>
         <div id="o-next"></div>
         <p class="note" id="o-upd"></p>
@@ -460,7 +461,7 @@ async function start(){
   if(recupero){$("login").hidden=true;$("app").hidden=true;$("reset").hidden=false;return;}
   $("reset").hidden=true;
   const {data:{session}}=await sb.auth.getSession();
-  if(session){$("login").hidden=true;$("app").hidden=false;loadAll();}
+  if(session){$("login").hidden=true;$("app").hidden=false;try{localStorage.setItem("be-noconto","1")}catch(e){}loadAll();loadLive();}
   else{$("app").hidden=true;$("login").hidden=false;}
 }
 $("login-form").addEventListener("submit",async e=>{
@@ -530,7 +531,34 @@ async function loadAll(){
   renderOggi();renderAgenda();renderClienti();renderNda();renderFor();renderCol();renderRic();renderSoc();renderTiles();fillEmailClients();
   if(!c.data?.length&&!k.data?.length&&!errs.length)chip("bad","Nessun dato: l'accesso non è ancora attivo");
 }
-$("refresh").addEventListener("click",loadAll);
+$("refresh").addEventListener("click",()=>{loadAll();loadLive();});
+
+/* ---------- sito in diretta (tabella visite, scritta dalla funzione "contatore") ---------- */
+const NOMI_PAGINE={"/":"Home","/index.html":"Home","/en/":"Home (EN)","/en/index.html":"Home (EN)"};
+const nomePagina=p=>NOMI_PAGINE[p]||String(p||"/").replace(/^\/(en\/)?/,(m,en)=>en?"EN · ":"").replace(/\.html$/,"").replace(/-/g," ");
+async function loadLive(){
+  const box=$("o-live");if(!box)return;
+  const da=new Date(Date.now()-7*864e5).toISOString();
+  const {data,error}=await sb.from("visite").select("sessione,pagina,provenienza,dispositivo,inizio,ultimo_segnale,secondi").gte("inizio",da).order("inizio",{ascending:false}).limit(3000);
+  if(error){box.innerHTML=`<div class="jbox"><p class="eyebrow">Sito in diretta</p><p class="note">Non riesco a leggere le visite: ${esc(error.message)}</p></div>`;return;}
+  const v=data||[],ora=Date.now();
+  const attivi=v.filter(x=>ora-new Date(x.ultimo_segnale).getTime()<90e3);
+  const adesso=new Map();attivi.forEach(x=>{if(!adesso.has(x.sessione))adesso.set(x.sessione,x);});
+  const mezzanotte=new Date();mezzanotte.setHours(0,0,0,0);
+  const oggiV=v.filter(x=>new Date(x.inizio)>=mezzanotte);
+  const persone=a=>new Set(a.map(x=>x.sessione)).size;
+  const conta=(a,k)=>{const m=new Map();a.forEach(x=>m.set(x[k],(m.get(x[k])||0)+1));return[...m].sort((p,q)=>q[1]-p[1]).slice(0,4);};
+  const durata=s=>s>=60?Math.round(s/60)+" min":s+" s";
+  box.innerHTML=`<div class="jbox"><p class="eyebrow">Sito in diretta · bonomelliestate.com</p>
+    <div class="tiles"><div class="tile"><b>${adesso.size}</b><span>adesso sul sito</span></div><div class="tile"><b>${persone(oggiV)}</b><span>visitatori oggi (${oggiV.length} pagine)</span></div><div class="tile"><b>${persone(v)}</b><span>visitatori in 7 giorni</span></div></div>
+    ${adesso.size?`<p class="note"><strong>Adesso:</strong> ${[...adesso.values()].map(x=>esc(nomePagina(x.pagina))+" · "+esc(x.dispositivo||"")).join(" — ")}</p>`:""}
+    ${v.length?`<p class="note"><strong>Pagine più viste (7 giorni):</strong> ${conta(v,"pagina").map(([p,n])=>esc(nomePagina(p))+" "+n).join(" · ")}</p>
+    <p class="note"><strong>Da dove arrivano:</strong> ${conta(v,"provenienza").filter(([p])=>p!=="sito").map(([p,n])=>esc(p)+" "+n).join(" · ")||"—"}</p>
+    <p class="note"><strong>Ultime visite:</strong></p>${v.slice(0,6).map(x=>`<p class="note" style="margin:0">${esc(fmtDate(x.inizio))} · ${esc(nomePagina(x.pagina))} · ${esc(x.dispositivo||"")} · ${esc(x.provenienza||"")} · ${esc(durata(x.secondi||0))}</p>`).join("")}`
+    :`<p class="note">Nessuna visita registrata ancora. Il contatore è attivo dal 27 ottobre 2026. Le tue visite da questo dispositivo non vengono contate.</p>`}
+    <p class="note">Si aggiorna da solo ogni 20 secondi.</p></div>`;
+}
+setInterval(()=>{if(!document.hidden&&!$("app").hidden)loadLive();},20000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!$("app").hidden)loadAll();});
 
 /* ---------- oggi ---------- */
@@ -1051,7 +1079,7 @@ if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="2.6";
+const APP_VERSION="2.7";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){
