@@ -221,6 +221,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
           <button class="tile" data-go="tab-cli" type="button"><b id="n-risp">–</b><span>hanno risposto</span></button>
           <button class="tile" data-go="tab-col" type="button"><b id="n-col">–</b><span>concept in collezione</span></button>
         </div>
+        <div id="o-push"></div>
         <div id="o-live"></div>
         <div id="o-ric"></div>
         <div id="o-next"></div>
@@ -461,7 +462,7 @@ async function start(){
   if(recupero){$("login").hidden=true;$("app").hidden=true;$("reset").hidden=false;return;}
   $("reset").hidden=true;
   const {data:{session}}=await sb.auth.getSession();
-  if(session){$("login").hidden=true;$("app").hidden=false;try{localStorage.setItem("be-noconto","1")}catch(e){}loadAll();loadLive();}
+  if(session){$("login").hidden=true;$("app").hidden=false;try{localStorage.setItem("be-noconto","1")}catch(e){}loadAll();loadLive();renderPush();}
   else{$("app").hidden=true;$("login").hidden=false;}
 }
 $("login-form").addEventListener("submit",async e=>{
@@ -1076,10 +1077,50 @@ $("c-clear").addEventListener("click",()=>{$("chat").innerHTML="";$("c-in").valu
 
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 
+/* ---------- notifiche push su questo dispositivo (funzione "jarvis-push") ---------- */
+const VAPID_PUB="BNY7LvK8iC7oYR6_HRP89Zlw-C33XbJ0AATOGEsTxbmspfHzlpE1dtjVajgoKosvfMP7PpQ_y50x99Wm6pKf8Z4";
+const b64u=s=>{const p="=".repeat((4-s.length%4)%4);const r=atob((s+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(r,c=>c.charCodeAt(0));};
+const nomeDisp=()=>{const u=navigator.userAgent;return /iPad/.test(u)||(/Macintosh/.test(u)&&navigator.maxTouchPoints>1)?"iPad":/iPhone/.test(u)?"iPhone":/Android/.test(u)?"Android":/Mac/.test(u)?"Mac":"Computer";};
+async function pushSub(){try{const r=await navigator.serviceWorker.ready;return await r.pushManager.getSubscription();}catch(e){return null;}}
+async function renderPush(msg){
+  const box=$("o-push");if(!box)return;
+  const ok="serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window;
+  if(!ok){box.innerHTML=`<div class="jbox"><p class="eyebrow">🔔 Notifiche su questo ${esc(nomeDisp())}</p><p class="note">Su iPhone e iPad le notifiche funzionano solo se apri JARVIS dall'icona sulla schermata Home (Safari → Condividi → "Aggiungi alla schermata Home"). Apri JARVIS da lì e torna qui.</p></div>`;return;}
+  const sub=await pushSub();const att=Notification.permission==="granted"&&sub;
+  box.innerHTML=`<div class="jbox"><p class="eyebrow">🔔 Notifiche su questo ${esc(nomeDisp())}</p>
+    <p class="note">${att?"<strong>Attive ✅</strong> Ti avviso anche con l'app chiusa: nuova richiesta dal sito, risposta da approvare, risposta inviata, nuovo messaggio social.":Notification.permission==="denied"?"Le notifiche sono bloccate. Vai in Impostazioni → Notifiche → JARVIS e attivale, poi torna qui.":"Non ancora attive su questo dispositivo."}</p>
+    ${msg?`<p class="note">${msg}</p>`:""}
+    <div class="btnrow">${att?`<button class="btn" type="button" id="p-test">Manda una notifica di prova</button><button class="btn ghost" type="button" id="p-off">Disattiva</button>`:Notification.permission==="denied"?"":`<button class="btn" type="button" id="p-on">Attiva le notifiche</button>`}</div></div>`;
+  const on=$("p-on");if(on)on.addEventListener("click",attivaPush);
+  const t=$("p-test");if(t)t.addEventListener("click",provaPush);
+  const off=$("p-off");if(off)off.addEventListener("click",async()=>{const s=await pushSub();if(s){await sb.from("push_iscrizioni").delete().eq("endpoint",s.endpoint);await s.unsubscribe();}renderPush("Disattivate su questo dispositivo.");});
+}
+async function attivaPush(){
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=="granted"){renderPush("Non hai dato il permesso. Riprova e tocca \"Consenti\".");return;}
+    const r=await navigator.serviceWorker.ready;
+    const sub=(await r.pushManager.getSubscription())||await r.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(VAPID_PUB)});
+    const j=sub.toJSON();
+    const {error}=await sb.from("push_iscrizioni").upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,dispositivo:nomeDisp()},{onConflict:"endpoint"});
+    if(error){renderPush("Non sono riuscito a salvare il dispositivo: "+esc(error.message));return;}
+    renderPush("Fatto. Ora tocca \"Manda una notifica di prova\".");
+  }catch(e){renderPush("Errore: "+esc(e.message||e));}
+}
+async function provaPush(){
+  const t=$("p-test");if(t)t.disabled=true;
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    const r=await fetch(URL_DB+"/functions/v1/jarvis-push",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+session.access_token,"apikey":KEY},body:JSON.stringify({titolo:"🔔 Prova di JARVIS",testo:"Se leggi questo, le notifiche arrivano davvero su "+nomeDisp()+".",tag:"prova"})});
+    const d=await r.json().catch(()=>({}));
+    renderPush(r.ok?`Inviata a ${d.dispositivi} dispositivi: ${(d.esiti||[]).map(x=>esc(x.dispositivo)+" "+esc(x.esito)).join(" · ")}. Chiudi l'app: la notifica deve comparire in pochi secondi.`:"Errore "+r.status);
+  }catch(e){renderPush("Errore: "+esc(e.message||e));}
+}
+
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="2.7";
+const APP_VERSION="2.8";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){

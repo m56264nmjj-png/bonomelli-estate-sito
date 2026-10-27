@@ -1,8 +1,9 @@
 {
-  "versione": "2.7",
+  "versione": "2.8",
   "data": "27 ottobre 2026",
   "novita": [
-    "Nuovo riquadro \"Sito in diretta\" nella Home: chi c'è adesso sul sito, cosa sta guardando, i visitatori di oggi e della settimana, da dove arrivano.",
-    "Si aggiorna da solo ogni 20 secondi. Le tue visite da questo dispositivo non vengono contate."
+    "Notifiche push vere, anche con l'app chiusa: nuova richiesta dal sito, risposta da approvare, risposta inviata, problemi, nuovi messaggi social.",
+    "Nella Home: \"Attiva le notifiche\" su ogni dispositivo (iPhone e iPad separatamente) e il tasto \"Manda una notifica di prova\".",
+    "Riquadro \"Sito in diretta\": chi c'è adesso sul sito e cosa guarda."
   ]
 }
