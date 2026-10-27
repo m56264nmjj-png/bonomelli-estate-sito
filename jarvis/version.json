@@ -1,9 +1,9 @@
 {
-  "versione": "2.8",
+  "versione": "2.9",
   "data": "27 ottobre 2026",
   "novita": [
-    "Notifiche push vere, anche con l'app chiusa: nuova richiesta dal sito, risposta da approvare, risposta inviata, problemi, nuovi messaggi social.",
-    "Nella Home: \"Attiva le notifiche\" su ogni dispositivo (iPhone e iPad separatamente) e il tasto \"Manda una notifica di prova\".",
-    "Riquadro \"Sito in diretta\": chi c'è adesso sul sito e cosa guarda."
+    "Recensioni: chi visita il sito può lasciarne una. Ti arriva una notifica e la trovi nella Home: \"Pubblica\" o \"Rifiuta\". Sul sito compaiono solo quelle che pubblichi tu.",
+    "Notifiche push anche con l'app chiusa (dalla 2.8).",
+    "Riquadro \"Sito in diretta\" (dalla 2.7)."
   ]
 }

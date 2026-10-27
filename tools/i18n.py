@@ -82,6 +82,20 @@ PAGES = {
         "it_desc": "Arredi in travertino massello: le sedute SAXUM, CULLAE, ONDUUM e AETERNUM, i tavoli CONVIVIO, HORTUS e LYMPHA e le librerie AETHER con vetro temperato scorrevole e luce LED.",
         "en_desc": "Solid travertine furniture: SAXUM, CULLAE, ONDUUM and AETERNUM seating, the CONVIVIO, HORTUS and LYMPHA tables and the AETHER bookcases with sliding tempered glass and LED light.",
     },
+    "convivio.html": {
+        "en": "convivio.html",
+        "it_title": "CONVIVIO, tavolino in ferro battuto e travertino su ordinazione · 1.290 € · Bonomelli Estate",
+        "en_title": "CONVIVIO, a hand-forged iron and travertine coffee table, made to order · €1,290 · Bonomelli Estate",
+        "it_desc": "Tavolino basso in ferro battuto a mano, travertino di Chiampo e vetro temperato, 100 × 50 × h 45 cm. Disegno di Brenda Bonomelli, realizzato su ordinazione in Veneto: 1.290 €, consegna entro 2 settimane.",
+        "en_desc": "Low coffee table in hand-forged iron, Chiampo travertine and tempered glass, 100 × 50 × h 45 cm. Designed by Brenda Bonomelli, made to order in the Veneto, Italy: €1,290, delivered within 2 weeks.",
+    },
+    "recensioni.html": {
+        "en": "reviews.html",
+        "it_title": "Recensioni · Bonomelli Estate, padiglioni e arredi in pietra di Brenda Bonomelli",
+        "en_title": "Reviews · Bonomelli Estate, stone pavilions and furniture by Brenda Bonomelli",
+        "it_desc": "Le recensioni dei visitatori su Bonomelli Estate, lo studio di Brenda Bonomelli: CONVIVIO, la Serra dei Sogni, i padiglioni e gli arredi in pietra. Lasci anche la sua.",
+        "en_desc": "Visitor reviews of Bonomelli Estate, Brenda Bonomelli’s studio: CONVIVIO, the Dream Greenhouse, the pavilions and the stone furniture. Leave yours too.",
+    },
     "corolla.html": {
         "en": "corolla.html",
         "it_title": "COROLLA, poltrona in velluto e pietra con schienale a petali · Bonomelli Estate",

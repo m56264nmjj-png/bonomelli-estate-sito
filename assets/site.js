@@ -91,9 +91,33 @@
     .catch(function(){st.classList.add('err');st.textContent=T('Non è stato possibile inviare la richiesta. Scriva a studio@bonomelliestate.it o su WhatsApp al +39 351 657 5517.','Your enquiry could not be sent. Please write to studio@bonomelliestate.it or on WhatsApp at +39 351 657 5517.')})
     .finally(function(){btn.disabled=false});
   });
-  var PJ={bonomelli:'Pavilion Bonomelli',caelo:'Pavilion Caelo',magnolia:'Pavilion Magnolia',rome:'Pavilion Rome',dhier:'Pavilion D\u2019Hier',forestier:'Pavilion Forestier',airfrais:'Pavilion Air Frais',serra:'Serra dei Sogni'};
+  var PJ={bonomelli:'Pavilion Bonomelli',caelo:'Pavilion Caelo',magnolia:'Pavilion Magnolia',rome:'Pavilion Rome',dhier:'Pavilion D\u2019Hier',forestier:'Pavilion Forestier',airfrais:'Pavilion Air Frais',serra:'Serra dei Sogni',convivio:'CONVIVIO'};
   var hm=(location.hash||'').match(/^#(dossier|consulenza)(?:-([a-z]+))?$/);
   if(hm){document.getElementById('f-tipo').value=hm[1];if(hm[2]&&PJ[hm[2]])document.getElementById('f-progetto').value=PJ[hm[2]];setTimeout(function(){form.scrollIntoView({block:'start'})},50)}
+  }
+  /* recensioni: solo quelle approvate da Brenda in JARVIS (funzione "recensioni", nessuna chiave) */
+  var rf=document.getElementById('rec-form');
+  if(rf){
+    var RC='https://klxcmojwmjilklfoqzhp.supabase.co/functions/v1/recensioni',rl=document.getElementById('rec-list');
+    var R=function(it,en){return root.lang==='en'?en:it};
+    var esc=function(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return '&#'+c.charCodeAt(0)+';'})};
+    fetch(RC).then(function(x){return x.json()}).then(function(a){
+      if(!a.length){rl.innerHTML='<p class="vnote">'+R('Ancora nessuna recensione pubblicata. Può essere la prima persona a lasciarne una.','No reviews published yet. You can be the first to leave one.')+'</p>';return}
+      var media=a.reduce(function(s,x){return s+x.voto},0)/a.length;
+      rl.innerHTML='<p class="eyebrow">'+'★'.repeat(Math.round(media))+'☆'.repeat(5-Math.round(media))+' · '+media.toFixed(1).replace('.',root.lang==='en'?'.':',')+'/5 · '+a.length+' '+R(a.length===1?'recensione':'recensioni',a.length===1?'review':'reviews')+'</p>'+a.map(function(x){
+        var d=new Date(x.creato_at).toLocaleDateString(root.lang==='en'?'en-GB':'it-IT',{month:'long',year:'numeric'});
+        return '<blockquote class="rev"><p>'+'★'.repeat(x.voto)+'☆'.repeat(5-x.voto)+'</p><p>'+esc(x.testo)+'</p><footer>— '+esc(x.nome)+(x.citta?', '+esc(x.citta):'')+(x.pezzo?' · '+esc(x.pezzo):'')+' · '+d+'</footer></blockquote>'}).join('');
+    }).catch(function(){rl.innerHTML='<p class="vnote">'+R('Non riesco a caricare le recensioni adesso.','Reviews cannot be loaded right now.')+'</p>'});
+    rf.addEventListener('submit',function(e){
+      e.preventDefault();var st=document.getElementById('r-status'),b=document.getElementById('r-send');st.className='f-msg';
+      var g=function(id){return document.getElementById(id).value.trim()};
+      if(g('r-nome').length<2||g('r-testo').length<10||!document.getElementById('r-consenso').checked){st.classList.add('err');st.textContent=R('Scriva nome, una recensione di almeno 10 caratteri e dia il consenso.','Please add your name, a review of at least 10 characters and your consent.');return}
+      b.disabled=true;st.textContent=R('Invio…','Sending…');
+      fetch(RC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:g('r-nome'),citta:g('r-citta'),voto:+g('r-voto'),pezzo:g('r-pezzo'),testo:g('r-testo'),web:g('r-web'),consenso:true,lingua:root.lang==='en'?'en':'it'})})
+      .then(function(x){if(!x.ok)throw new Error(x.status);rf.reset();st.classList.add('ok');st.textContent=R('Grazie! La sua recensione è arrivata: comparirà dopo la lettura di Brenda.','Thank you! Your review has arrived: it will appear once Brenda has read it.')})
+      .catch(function(){st.classList.add('err');st.textContent=R('Non è stato possibile inviarla. Riprovi tra poco (i link nel testo non sono ammessi).','It could not be sent. Please try again shortly (links are not allowed in the text).')})
+      .finally(function(){b.disabled=false});
+    });
   }
   var pvt=document.querySelectorAll('[data-pv][role="tab"]');
   pvt.forEach(function(t){t.addEventListener('click',function(){

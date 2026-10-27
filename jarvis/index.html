@@ -221,6 +221,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
           <button class="tile" data-go="tab-cli" type="button"><b id="n-risp">–</b><span>hanno risposto</span></button>
           <button class="tile" data-go="tab-col" type="button"><b id="n-col">–</b><span>concept in collezione</span></button>
         </div>
+        <div id="o-rec"></div>
         <div id="o-push"></div>
         <div id="o-live"></div>
         <div id="o-ric"></div>
@@ -462,7 +463,7 @@ async function start(){
   if(recupero){$("login").hidden=true;$("app").hidden=true;$("reset").hidden=false;return;}
   $("reset").hidden=true;
   const {data:{session}}=await sb.auth.getSession();
-  if(session){$("login").hidden=true;$("app").hidden=false;try{localStorage.setItem("be-noconto","1")}catch(e){}loadAll();loadLive();renderPush();}
+  if(session){$("login").hidden=true;$("app").hidden=false;try{localStorage.setItem("be-noconto","1")}catch(e){}loadAll();loadLive();loadRec();renderPush();}
   else{$("app").hidden=true;$("login").hidden=false;}
 }
 $("login-form").addEventListener("submit",async e=>{
@@ -532,7 +533,25 @@ async function loadAll(){
   renderOggi();renderAgenda();renderClienti();renderNda();renderFor();renderCol();renderRic();renderSoc();renderTiles();fillEmailClients();
   if(!c.data?.length&&!k.data?.length&&!errs.length)chip("bad","Nessun dato: l'accesso non è ancora attivo");
 }
-$("refresh").addEventListener("click",()=>{loadAll();loadLive();});
+$("refresh").addEventListener("click",()=>{loadAll();loadLive();loadRec();});
+
+/* ---------- recensioni del sito: compaiono sul sito solo dopo "Pubblica" ---------- */
+async function loadRec(){
+  const box=$("o-rec");if(!box)return;
+  const {data,error}=await sb.from("recensioni").select("id,nome,citta,voto,testo,pezzo,creato_at,stato").order("creato_at",{ascending:false}).limit(200);
+  if(error){box.innerHTML="";return;}
+  const da=(data||[]).filter(r=>r.stato==="da_approvare"),pub=(data||[]).filter(r=>r.stato==="approvata").length;
+  box.innerHTML=`<div class="jbox"><p class="eyebrow">⭐ Recensioni del sito</p>
+    <p class="note">${pub} pubblicate · ${da.length} da leggere. Regola scritta sul sito: si tolgono solo spam, pubblicità e offese, non le recensioni con voto basso.</p>
+    ${da.map(r=>`<div style="border-top:1px solid var(--line);padding-top:10px"><p style="margin:0">${"★".repeat(r.voto)}${"☆".repeat(5-r.voto)} · <strong>${esc(r.nome)}</strong>${r.citta?", "+esc(r.citta):""}${r.pezzo?" · "+esc(r.pezzo):""} · ${esc(fmtDate(r.creato_at))}</p><p class="note" style="margin:6px 0">${esc(r.testo)}</p><div class="btnrow"><button class="btn" type="button" data-rec="approvata" data-id="${r.id}">Pubblica</button><button class="btn ghost" type="button" data-rec="rifiutata" data-id="${r.id}">Rifiuta (spam o offese)</button></div></div>`).join("")}
+  </div>`;
+  box.querySelectorAll("[data-rec]").forEach(b=>b.addEventListener("click",async()=>{
+    b.disabled=true;
+    const {error}=await sb.from("recensioni").update({stato:b.dataset.rec,deciso_at:new Date().toISOString()}).eq("id",+b.dataset.id);
+    if(error){alert("Non riesco a salvare: "+error.message);b.disabled=false;return;}
+    loadRec();
+  }));
+}
 
 /* ---------- sito in diretta (tabella visite, scritta dalla funzione "contatore") ---------- */
 const NOMI_PAGINE={"/":"Home","/index.html":"Home","/en/":"Home (EN)","/en/index.html":"Home (EN)"};
@@ -1120,7 +1139,7 @@ async function provaPush(){
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="2.8";
+const APP_VERSION="2.9";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){

@@ -333,3 +333,10 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,4.6vw,60px);l
 .enq{scroll-margin-top:110px}
 @media (max-width:420px){.mark{font-size:13px;letter-spacing:.18em}.bar-r{gap:8px}.lang button,.lang a{padding:7px 7px}}
 #serra .plates figure{display:flex;flex-direction:column}#serra .plates figure img{height:auto;flex:1 1 auto;min-height:0}#serra .plates figcaption{flex:none}
+
+/* recensioni */
+.rev{margin:0 0 18px;padding:18px 20px;border-left:2px solid var(--bronze)}
+.rev p{margin:0 0 8px}
+.rev p:first-child{color:var(--bronze);letter-spacing:.15em}
+.rev footer{font-size:14px;color:var(--stone);opacity:.75}
+#rec-list{margin:24px 0 40px}
