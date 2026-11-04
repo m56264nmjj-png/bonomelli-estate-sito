@@ -181,6 +181,21 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
 .rb-hint{font-size:13px;color:var(--muted);margin:0}
 @media (prefers-reduced-motion:reduce){.orb,.rb,.rb-av{transition:none}.orb{transition-delay:0s}}
 @media (max-width:520px){.rb-edit{padding-left:6px}}
+/* ---------- behance: lavori freelance letti dalle email ---------- */
+.bh-list{display:flex;flex-direction:column;gap:14px;max-width:820px}
+.bh{border:1px solid var(--line);border-left:3px solid var(--vc,var(--line));background:var(--panel);padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+.bh[data-v="adatto"]{--vc:var(--ok)}.bh[data-v="forse"]{--vc:var(--warn)}.bh[data-v="no"]{--vc:var(--line);opacity:.75}
+.bh-top{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between}
+.bh-v{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--vc);border:1px solid var(--vc);padding:3px 9px;border-radius:999px}
+.bh-inv{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--bg);background:var(--brass);padding:3px 9px;border-radius:999px}
+.bh-d{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.bh h3{font-family:var(--display);font-weight:400;letter-spacing:.04em;font-size:19px;line-height:1.3;margin:0}
+.bh-b{font-family:var(--mono);font-size:20px;color:var(--brass)}
+.bh-c{font-size:13px;color:var(--muted)}
+.bh-t{font-size:14px;margin:0;color:var(--ink);opacity:.85}
+.bh-m{font-size:13px;color:var(--muted);margin:0;font-style:italic}
+.bh .btnrow .btn{min-height:40px;padding:8px 14px}
+.bh-st{font-size:12px;color:var(--ok);letter-spacing:.1em;text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -230,6 +245,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
   <nav class="tabs" role="tablist" aria-label="Sezioni">
     <button role="tab" id="tab-oggi" aria-selected="true" aria-controls="p-oggi">Oggi</button>
     <button role="tab" id="tab-rub" aria-selected="false" aria-controls="p-rub">Rubrica<span class="count" id="cnt-rub"></span></button>
+    <button role="tab" id="tab-beh" aria-selected="false" aria-controls="p-beh">Behance<span class="count" id="cnt-beh"></span></button>
     <button role="tab" id="tab-age" aria-selected="false" aria-controls="p-age">Agenda<span class="count" id="cnt-age"></span></button>
     <button role="tab" id="tab-cli" aria-selected="false" aria-controls="p-cli">Clienti<span class="count" id="cnt-cli"></span></button>
     <button role="tab" id="tab-nda" aria-selected="false" aria-controls="p-nda">NDA<span class="count" id="cnt-nda"></span></button>
@@ -282,6 +298,15 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
       <div class="rb-filters" id="rb-f" role="group" aria-label="Filtra la rubrica"></div>
     </div>
     <ul class="rb-list" id="rb-list"><li class="empty"><strong>Carico la rubrica…</strong></li></ul>
+  </section>
+
+  <!-- BEHANCE: lavori freelance letti in automatico dalle email (ogni ora) -->
+  <section id="p-beh" role="tabpanel" aria-labelledby="tab-beh" hidden>
+    <div class="rb-top">
+      <div><p class="eyebrow">Behance</p><p class="rb-hint">JARVIS legge ogni ora le email di Behance e dà un voto: <b style="color:var(--ok)">adatto</b>, <b style="color:var(--warn)">forse</b>, no. Le email restano come sono.</p></div>
+      <div class="rb-filters" id="bh-f" role="group" aria-label="Filtra i lavori"></div>
+    </div>
+    <div class="bh-list" id="bh-list"><div class="empty"><strong>Carico i lavori…</strong></div></div>
   </section>
 
   <!-- AGENDA: solo gli appuntamenti -->
@@ -547,17 +572,17 @@ $("reset-form").addEventListener("submit",async e=>{
 });
 
 /* ---------- schede ---------- */
-const TABS=["oggi","rub","age","cli","nda","for","scr","col","ric","soc","ask"];
+const TABS=["oggi","rub","beh","age","cli","nda","for","scr","col","ric","soc","ask"];
 function openTab(t){TABS.forEach(x=>{$("tab-"+x).setAttribute("aria-selected",x===t?"true":"false");$("p-"+x).hidden=x!==t;});try{localStorage.setItem("jv-tab",t)}catch(e){}}
 TABS.forEach(t=>$("tab-"+t).addEventListener("click",()=>openTab(t)));
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>openTab(b.dataset.go.slice(4))));
 try{const h=location.hash.slice(1);const t=TABS.includes(h)?h:localStorage.getItem("jv-tab");if(TABS.includes(t))openTab(t);}catch(e){}
 
 /* ---------- dati ---------- */
-let oggi=null,clienti=[],collezione=[],ric=[],soc=[],nda=[],agenda=[],fornitori=[];
+let behance=[],oggi=null,clienti=[],collezione=[],ric=[],soc=[],nda=[],agenda=[],fornitori=[];
 async function loadAll(){
   chip("","Aggiorno…");
-  const [b,c,k,r,j,m,n,a,f]=await Promise.all([
+  const [b,c,k,r,j,m,n,a,f,bh]=await Promise.all([
     sb.from("app_bacheca").select("contenuto,aggiornato_at").eq("chiave","oggi").maybeSingle(),
     sb.from("app_clienti").select("*").order("data",{ascending:false}),
     sb.from("app_collezione").select("*").order("ordine"),
@@ -566,9 +591,10 @@ async function loadAll(){
     sb.from("jarvis_messaggi").select("id,created_at,canale,contatto_id,contatto_nome,direzione,testo,stato,motivo,errore").order("created_at",{ascending:false}).limit(500),
     sb.from("app_nda").select("*").order("creato_at",{ascending:false}),
     sb.from("app_agenda").select("*").order("giorno").order("ora"),
-    sb.from("app_fornitori").select("*").order("progetto").order("creato_at")
+    sb.from("app_fornitori").select("*").order("progetto").order("creato_at"),
+    sb.from("app_behance").select("id,tipo,cliente,titolo,budget,budget_max,link,testo,voto,motivo,stato,ricevuto_at").neq("stato","debug").order("ricevuto_at",{ascending:false}).limit(400)
   ]);
-  const errs=[b,c,k,r,j,m,n,a,f].filter(x=>x.error);
+  const errs=[b,c,k,r,j,m,n,a,f,bh].filter(x=>x.error);
   if(errs.length){
     const msg=errs[0].error.message||"";
     if(/JWT|expired|auth/i.test(msg)){await sb.auth.signOut();return;}
@@ -578,8 +604,8 @@ async function loadAll(){
   clienti=c.data||[];collezione=k.data||[];
   const js=new Map((j.data||[]).map(x=>[x.richiesta_id,x]));
   ric=(r.data||[]).map(x=>({...x,j:js.get(x.id)||null}));
-  soc=m.data||[];nda=n.data||[];agenda=a.data||[];fornitori=f.data||[];
-  renderOggi();renderAgenda();renderClienti();renderNda();renderFor();renderCol();renderRic();renderSoc();renderTiles();fillEmailClients();renderRub();
+  soc=m.data||[];nda=n.data||[];agenda=a.data||[];fornitori=f.data||[];behance=bh.data||[];
+  renderOggi();renderAgenda();renderClienti();renderNda();renderFor();renderCol();renderRic();renderSoc();renderTiles();fillEmailClients();renderRub();renderBeh();
   if(!c.data?.length&&!k.data?.length&&!errs.length)chip("bad","Nessun dato: l'accesso non è ancora attivo");
 }
 $("refresh").addEventListener("click",()=>{loadAll();loadLive();loadRec();});
@@ -1006,6 +1032,37 @@ $("rb-q").addEventListener("input",()=>{rbOpen=null;rbEdit=null;renderRub();});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&rbOpen){rbOpen=null;rbEdit=null;renderRub();}});
 document.addEventListener("click",e=>{if(!e.target.isConnected||e.target.closest(".rb-main"))return;if(rbOpen&&!rbEdit&&!$("p-rub").hidden&&!e.target.closest(".rb.open")){rbOpen=null;renderRub();}});
 
+/* ---------- behance ---------- */
+let bhFilter="guarda";
+const BHV={adatto:"✓ Adatto",forse:"Forse",no:"No"};
+function renderBeh(){
+  const vivi=behance.filter(x=>x.stato!=="scartato");
+  const F={guarda:["Da guardare",x=>x.stato==="nuovo"&&(x.voto!=="no"||x.tipo==="invito")],inviti:["Inviti",x=>x.tipo==="invito"&&x.stato!=="scartato"],
+    interessa:["Mi interessa",x=>x.stato==="interessa"],tutti:["Tutti",x=>x.stato!=="scartato"],scartati:["Scartati",x=>x.stato==="scartato"]};
+  $("bh-f").innerHTML=Object.entries(F).map(([k,[t,f]])=>`<button type="button" data-bh="${k}" aria-pressed="${bhFilter===k}">${t}<b>${behance.filter(f).length}</b></button>`).join("");
+  $("bh-f").querySelectorAll("[data-bh]").forEach(b=>b.addEventListener("click",()=>{bhFilter=b.dataset.bh;renderBeh();}));
+  const nuovi=behance.filter(F.guarda[1]).length;$("cnt-beh").textContent=nuovi||"";
+  const ord={adatto:0,forse:1,no:2};
+  const L=behance.filter(F[bhFilter][1]).sort((a,b)=>(b.tipo==="invito")-(a.tipo==="invito")||ord[a.voto]-ord[b.voto]||new Date(b.ricevuto_at)-new Date(a.ricevuto_at));
+  if(!L.length){$("bh-list").innerHTML=`<div class="empty"><strong>${bhFilter==="guarda"?"Niente di nuovo da guardare":"Lista vuota"}</strong>${bhFilter==="guarda"?"Quando arriva un lavoro adatto ti mando una notifica.":"Prova un altro filtro."}</div>`;return;}
+  $("bh-list").innerHTML=L.map(x=>{const u=safeUrl(x.link);const desc=String(x.testo||"").split("\n");
+    return `<article class="bh" data-v="${esc(x.voto)}" data-id="${esc(x.id)}">
+      <div class="bh-top"><span>${x.tipo==="invito"?'<span class="bh-inv">Invito per te</span> ':""}<span class="bh-v">${esc(BHV[x.voto]||x.voto)}</span></span><span class="bh-d">${esc(fmtGiorno(x.ricevuto_at))}</span></div>
+      <h3>${esc(x.titolo)}</h3>
+      <div class="bh-b">${esc(x.budget||"budget non indicato")}</div>
+      <div class="bh-c">${esc(x.cliente||"")}${desc[1]?" · "+esc(desc[1]):""}</div>
+      ${desc[0]?`<p class="bh-t">${esc(desc[0])}</p>`:""}
+      <p class="bh-m">${esc(x.motivo||"")}</p>
+      <div class="btnrow">${u?`<a class="btn" href="${esc(u)}" target="_blank" rel="noopener">Apri su Behance</a>`:""}
+        ${x.stato!=="interessa"?`<button class="btn ghost" type="button" data-bs="interessa">Mi interessa</button>`:`<span class="bh-st">★ Ti interessa</span>`}
+        ${x.stato!=="scartato"?`<button class="btn ghost" type="button" data-bs="scartato">Scarta</button>`:`<button class="btn ghost" type="button" data-bs="nuovo">Ripristina</button>`}</div>
+    </article>`;}).join("");
+  $("bh-list").querySelectorAll("[data-bs]").forEach(b=>b.addEventListener("click",async()=>{
+    const id=b.closest(".bh").dataset.id,x=behance.find(z=>z.id===id),st=b.dataset.bs;b.disabled=true;
+    const {error}=await sb.from("app_behance").update({stato:st,aggiornato_at:new Date().toISOString()}).eq("id",id);
+    if(error){b.disabled=false;b.textContent="Riprova";return;}x.stato=st;renderBeh();}));
+}
+
 /* ---------- scrivi: email tipo ---------- */
 const FRASI={
   "pav-rome":{it:"un tempietto con colonne binate che si specchia nell'acqua, pensato per cerimonie e momenti raccolti.",en:"a circular temple with paired columns reflected in the water, designed for ceremonies and quiet moments."},
@@ -1302,7 +1359,7 @@ async function provaPush(){
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="3.0";
+const APP_VERSION="3.1";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){

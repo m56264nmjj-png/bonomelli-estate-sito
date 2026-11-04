@@ -1,10 +1,9 @@
 {
-  "versione": "3.0",
+  "versione": "3.1",
   "data": "4 novembre 2026",
   "novita": [
-    "Rubrica: tutti i contatti in una lista sola (clienti, partner, fornitori, richieste dal sito). Tocca un nome e i contatti escono a mezza luna: chiama, WhatsApp, email, Instagram, LinkedIn.",
-    "Ricerca veloce e filtri, compreso \"★ Caldi\" per chi ha risposto o è in trattativa.",
-    "Tasto \"Completa\" per aggiungere al volo telefono, email, Instagram o LinkedIn che mancano.",
-    "Recensioni dal sito (dalla 2.9) e notifiche push anche con l'app chiusa (dalla 2.8)."
+    "Behance: JARVIS legge ogni ora le email di Behance (senza toccarle) e ti mostra i lavori con un voto: adatto, forse, no. Notifica quando arriva un invito o un lavoro adatto.",
+    "Bottoni \"Apri su Behance\", \"Mi interessa\" e \"Scarta\".",
+    "Rubrica con i contatti a mezza luna (dalla 3.0)."
   ]
 }
