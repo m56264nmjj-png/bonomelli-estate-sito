@@ -1,9 +1,8 @@
 {
-  "versione": "3.1",
-  "data": "4 novembre 2026",
+  "versione": "3.2",
+  "data": "5 novembre 2026",
   "novita": [
-    "Behance: JARVIS legge ogni ora le email di Behance (senza toccarle) e ti mostra i lavori con un voto: adatto, forse, no. Notifica quando arriva un invito o un lavoro adatto.",
-    "Bottoni \"Apri su Behance\", \"Mi interessa\" e \"Scarta\".",
-    "Rubrica con i contatti a mezza luna (dalla 3.0)."
+    "Nuovo bottone \"Password posta\" in alto: quando cambi la password della email studio@ su Aruba, la scrivi qui. Va nella cassaforte del server e JARVIS torna a mandare le email e a leggere Behance.",
+    "Behance: JARVIS legge la proposta per intero prima di darti il voto (dalla 3.1)."
   ]
 }

@@ -236,10 +236,18 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
       <span class="chip" id="st"><i></i>In collegamento…</span>
       <button class="btn ghost" id="refresh" type="button">↻ Aggiorna</button>
       <button class="btn ghost" id="chpw" type="button">Cambia password</button>
+      <button class="btn ghost" id="mailpw" type="button">Password posta</button>
       <button class="btn ghost" id="logout" type="button">Esci</button>
     </div>
   </header>
   <div class="upd" id="upd" role="status" hidden></div>
+  <form class="upd" id="mp-box" hidden autocomplete="off">
+    <div style="flex:1;min-width:240px"><p class="t">Password della posta studio@</p>
+      <p class="note">Quando cambi la password della email su Aruba, scrivila qui. Va nella cassaforte del server: serve a JARVIS per mandare le risposte ai clienti e leggere Behance. Nessuno la può rileggere, nemmeno Claude.</p>
+      <label class="f" style="margin-top:10px">Nuova password<input type="password" id="mp-in" autocomplete="new-password" autocapitalize="off" spellcheck="false" style="padding:9px 11px;border:1px solid var(--line);background:var(--bg);min-height:44px;font-size:16px"></label>
+      <p class="err" id="mp-err" hidden></p><p class="note" id="mp-ok" hidden style="color:var(--ok)"></p></div>
+    <div class="btnrow"><button class="btn" id="mp-save" type="submit">Salva</button><button class="btn ghost" id="mp-x" type="button">Chiudi</button></div>
+  </form>
 
   <div class="frieze" aria-hidden="true"></div>
   <nav class="tabs" role="tablist" aria-label="Sezioni">
@@ -548,6 +556,14 @@ $("login-form").addEventListener("submit",async e=>{
   $("l-pass").value="";start();
 });
 $("chpw").addEventListener("click",()=>{recupero=true;start();});
+/* password della posta: va nella cassaforte (vault) tramite una funzione che accetta solo Brenda; non viene mai riletta dall'app */
+$("mailpw").addEventListener("click",()=>{const b=$("mp-box");b.hidden=!b.hidden;$("mp-err").hidden=true;$("mp-ok").hidden=true;if(!b.hidden)$("mp-in").focus();});
+$("mp-x").addEventListener("click",()=>{$("mp-in").value="";$("mp-box").hidden=true;});
+$("mp-box").addEventListener("submit",async e=>{e.preventDefault();const v=$("mp-in").value;$("mp-err").hidden=true;$("mp-ok").hidden=true;
+  if(v.length<6){$("mp-err").textContent="Password troppo corta.";$("mp-err").hidden=false;return;}
+  $("mp-save").disabled=true;const {error}=await sb.rpc("jarvis_imposta_posta",{p:v});$("mp-save").disabled=false;$("mp-in").value="";
+  if(error){$("mp-err").textContent="Non sono riuscito a salvarla. Riprova.";$("mp-err").hidden=false;return;}
+  $("mp-ok").textContent="Salvata nella cassaforte. Dillo a Claude: controlla subito che le email ripartano.";$("mp-ok").hidden=false;});
 $("logout").addEventListener("click",async()=>{await sb.auth.signOut();start();});
 sb.auth.onAuthStateChange(ev=>{if(ev==="PASSWORD_RECOVERY"){recupero=true;start();}else if(ev==="SIGNED_OUT")start();});
 /* password dimenticata: email con il link, poi nuova password */
@@ -1359,7 +1375,7 @@ async function provaPush(){
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="3.1";
+const APP_VERSION="3.2";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){
