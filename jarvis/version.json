@@ -1,8 +1,8 @@
 {
-  "versione": "3.2",
-  "data": "5 novembre 2026",
+  "versione": "3.3",
+  "data": "18 novembre 2026",
   "novita": [
-    "Nuovo bottone \"Password posta\" in alto: quando cambi la password della email studio@ su Aruba, la scrivi qui. Va nella cassaforte del server e JARVIS torna a mandare le email e a leggere Behance.",
-    "Behance: JARVIS legge la proposta per intero prima di darti il voto (dalla 3.1)."
+    "Nuovo bottone \"Chiave Postiz\" in alto: incolli la chiave di Postiz e va nella cassaforte del server. Serve a JARVIS per pubblicare su YouTube, Instagram, Threads e TikTok.",
+    "Bottone \"Password posta\" per la email studio@ (dalla 3.2)."
   ]
 }

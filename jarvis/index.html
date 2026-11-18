@@ -237,6 +237,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
       <button class="btn ghost" id="refresh" type="button">↻ Aggiorna</button>
       <button class="btn ghost" id="chpw" type="button">Cambia password</button>
       <button class="btn ghost" id="mailpw" type="button">Password posta</button>
+      <button class="btn ghost" id="pzbtn" type="button">Chiave Postiz</button>
       <button class="btn ghost" id="logout" type="button">Esci</button>
     </div>
   </header>
@@ -248,6 +249,14 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
       <p class="err" id="mp-err" hidden></p><p class="note" id="mp-ok" hidden style="color:var(--ok)"></p></div>
     <div class="btnrow"><button class="btn" id="mp-save" type="submit">Salva</button><button class="btn ghost" id="mp-x" type="button">Chiudi</button></div>
   </form>
+  <form class="upd" id="pz-box" hidden autocomplete="off">
+    <div style="flex:1;min-width:240px"><p class="t">Chiave API di Postiz</p>
+      <p class="note">La trovi in Postiz → Settings → Developers → Public API. Incollala qui: va nella cassaforte del server e serve a JARVIS per pubblicare su YouTube, Instagram, Threads e TikTok. Nessuno la può rileggere, nemmeno Claude.</p>
+      <label class="f" style="margin-top:10px">Chiave<input type="password" id="pz-in" autocomplete="off" autocapitalize="off" spellcheck="false" style="padding:9px 11px;border:1px solid var(--line);background:var(--bg);min-height:44px;font-size:16px"></label>
+      <p class="err" id="pz-err" hidden></p><p class="note" id="pz-ok" hidden style="color:var(--ok)"></p></div>
+    <div class="btnrow"><button class="btn" id="pz-save" type="submit">Salva</button><button class="btn ghost" id="pz-x" type="button">Chiudi</button></div>
+  </form>
+
 
   <div class="frieze" aria-hidden="true"></div>
   <nav class="tabs" role="tablist" aria-label="Sezioni">
@@ -564,6 +573,14 @@ $("mp-box").addEventListener("submit",async e=>{e.preventDefault();const v=$("mp
   $("mp-save").disabled=true;const {error}=await sb.rpc("jarvis_imposta_posta",{p:v});$("mp-save").disabled=false;$("mp-in").value="";
   if(error){$("mp-err").textContent="Non sono riuscito a salvarla. Riprova.";$("mp-err").hidden=false;return;}
   $("mp-ok").textContent="Salvata nella cassaforte. Dillo a Claude: controlla subito che le email ripartano.";$("mp-ok").hidden=false;});
+/* chiave Postiz: stessa cassaforte, funzione che accetta solo Brenda; mai riletta dall'app */
+$("pzbtn").addEventListener("click",()=>{const b=$("pz-box");b.hidden=!b.hidden;$("pz-err").hidden=true;$("pz-ok").hidden=true;if(!b.hidden)$("pz-in").focus();});
+$("pz-x").addEventListener("click",()=>{$("pz-in").value="";$("pz-box").hidden=true;});
+$("pz-box").addEventListener("submit",async e=>{e.preventDefault();const v=$("pz-in").value.trim();$("pz-err").hidden=true;$("pz-ok").hidden=true;
+  if(v.length<10){$("pz-err").textContent="Chiave troppo corta: copiala di nuovo da Postiz.";$("pz-err").hidden=false;return;}
+  $("pz-save").disabled=true;const {error}=await sb.rpc("jarvis_imposta_postiz",{k:v});$("pz-save").disabled=false;$("pz-in").value="";
+  if(error){$("pz-err").textContent="Non sono riuscito a salvarla. Riprova.";$("pz-err").hidden=false;return;}
+  $("pz-ok").textContent="Salvata nella cassaforte. Scrivi a Claude: \"fatto\".";$("pz-ok").hidden=false;});
 $("logout").addEventListener("click",async()=>{await sb.auth.signOut();start();});
 sb.auth.onAuthStateChange(ev=>{if(ev==="PASSWORD_RECOVERY"){recupero=true;start();}else if(ev==="SIGNED_OUT")start();});
 /* password dimenticata: email con il link, poi nuova password */
@@ -1375,7 +1392,7 @@ async function provaPush(){
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="3.2";
+const APP_VERSION="3.3";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){
