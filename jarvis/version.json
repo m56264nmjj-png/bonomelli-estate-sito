@@ -1,8 +1,8 @@
 {
-  "versione": "3.3",
-  "data": "18 novembre 2026",
+  "versione": "3.4",
+  "data": "19 novembre 2026",
   "novita": [
-    "Nuovo bottone \"Chiave Postiz\" in alto: incolli la chiave di Postiz e va nella cassaforte del server. Serve a JARVIS per pubblicare su YouTube, Instagram, Threads e TikTok.",
-    "Bottone \"Password posta\" per la email studio@ (dalla 3.2)."
+    "Nuovo bottone \"Chiave Facebook\" in alto: incolli la chiave della Pagina Facebook e va nella cassaforte del server. Serve a JARVIS per pubblicare sulla Pagina senza Postiz.",
+    "Bottone \"Chiave Postiz\" (dalla 3.3)."
   ]
 }

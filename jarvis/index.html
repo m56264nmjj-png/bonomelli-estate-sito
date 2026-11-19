@@ -238,6 +238,7 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
       <button class="btn ghost" id="chpw" type="button">Cambia password</button>
       <button class="btn ghost" id="mailpw" type="button">Password posta</button>
       <button class="btn ghost" id="pzbtn" type="button">Chiave Postiz</button>
+      <button class="btn ghost" id="fbbtn" type="button">Chiave Facebook</button>
       <button class="btn ghost" id="logout" type="button">Esci</button>
     </div>
   </header>
@@ -255,6 +256,13 @@ ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
       <label class="f" style="margin-top:10px">Chiave<input type="password" id="pz-in" autocomplete="off" autocapitalize="off" spellcheck="false" style="padding:9px 11px;border:1px solid var(--line);background:var(--bg);min-height:44px;font-size:16px"></label>
       <p class="err" id="pz-err" hidden></p><p class="note" id="pz-ok" hidden style="color:var(--ok)"></p></div>
     <div class="btnrow"><button class="btn" id="pz-save" type="submit">Salva</button><button class="btn ghost" id="pz-x" type="button">Chiudi</button></div>
+  </form>
+  <form class="upd" id="fb-box" hidden autocomplete="off">
+    <div style="flex:1;min-width:240px"><p class="t">Chiave della Pagina Facebook</p>
+      <p class="note">È il "Page access token" della Pagina Bonomelli Estate (quello lungo, che non scade). Incollalo qui: va nella cassaforte del server e serve a JARVIS per pubblicare sulla Pagina e leggere i numeri. Nessuno lo può rileggere, nemmeno Claude.</p>
+      <label class="f" style="margin-top:10px">Chiave<input type="password" id="fb-in" autocomplete="off" autocapitalize="off" spellcheck="false" style="padding:9px 11px;border:1px solid var(--line);background:var(--bg);min-height:44px;font-size:16px"></label>
+      <p class="err" id="fb-err" hidden></p><p class="note" id="fb-ok" hidden style="color:var(--ok)"></p></div>
+    <div class="btnrow"><button class="btn" id="fb-save" type="submit">Salva</button><button class="btn ghost" id="fb-x" type="button">Chiudi</button></div>
   </form>
 
 
@@ -581,6 +589,13 @@ $("pz-box").addEventListener("submit",async e=>{e.preventDefault();const v=$("pz
   $("pz-save").disabled=true;const {error}=await sb.rpc("jarvis_imposta_postiz",{k:v});$("pz-save").disabled=false;$("pz-in").value="";
   if(error){$("pz-err").textContent="Non sono riuscito a salvarla. Riprova.";$("pz-err").hidden=false;return;}
   $("pz-ok").textContent="Salvata nella cassaforte. Scrivi a Claude: \"fatto\".";$("pz-ok").hidden=false;});
+$("fbbtn").addEventListener("click",()=>{const b=$("fb-box");b.hidden=!b.hidden;$("fb-err").hidden=true;$("fb-ok").hidden=true;if(!b.hidden)$("fb-in").focus();});
+$("fb-x").addEventListener("click",()=>{$("fb-in").value="";$("fb-box").hidden=true;});
+$("fb-box").addEventListener("submit",async e=>{e.preventDefault();const v=$("fb-in").value.trim();$("fb-err").hidden=true;$("fb-ok").hidden=true;
+  if(v.length<50){$("fb-err").textContent="Chiave troppo corta: copiala di nuovo intera (inizia di solito con EAA).";$("fb-err").hidden=false;return;}
+  $("fb-save").disabled=true;const {error}=await sb.rpc("jarvis_imposta_facebook",{k:v});$("fb-save").disabled=false;$("fb-in").value="";
+  if(error){$("fb-err").textContent="Non sono riuscito a salvarla. Riprova.";$("fb-err").hidden=false;return;}
+  $("fb-ok").textContent="Salvata nella cassaforte. Scrivi a Claude: \"fatto\".";$("fb-ok").hidden=false;});
 $("logout").addEventListener("click",async()=>{await sb.auth.signOut();start();});
 sb.auth.onAuthStateChange(ev=>{if(ev==="PASSWORD_RECOVERY"){recupero=true;start();}else if(ev==="SIGNED_OUT")start();});
 /* password dimenticata: email con il link, poi nuova password */
@@ -1392,7 +1407,7 @@ async function provaPush(){
 /* ---------- aggiornamenti dell'app (come l'App Store) ----------
    Quando si pubblica una versione nuova: alzare APP_VERSION qui e "versione" in version.json,
    e scrivere le novità in version.json. */
-const APP_VERSION="3.3";
+const APP_VERSION="3.4";
 $("ver").textContent="v"+APP_VERSION;
 function showUpd(html,btns){const u=$("upd");u.innerHTML=html+btns;u.hidden=false;}
 async function aggiorna(){
