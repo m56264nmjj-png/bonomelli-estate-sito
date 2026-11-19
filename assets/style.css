@@ -342,3 +342,12 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,4.6vw,60px);l
 #rec-list{margin:24px 0 40px}
 
 .pv-sub{display:block;font-family:inherit;font-size:clamp(15px,1.6vw,19px);letter-spacing:.06em;text-transform:none;line-height:1.4;margin-top:12px;color:var(--stone);opacity:.85}
+
+/* modulo contatti: dettagli facoltativi richiudibili */
+.f-more{display:grid;gap:16px;min-width:0}
+.f-more>summary{cursor:pointer;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--stone-dim);padding:10px 0;min-height:44px;display:flex;align-items:center;list-style:none}
+.f-more>summary::-webkit-details-marker{display:none}
+.f-more>summary::before{content:"+";display:inline-block;width:1.2em;color:var(--bronze)}
+.f-more[open]>summary::before{content:"−"}
+.f-more>summary:hover{color:var(--stone)}
+.f-more>.f-row{margin-bottom:16px}

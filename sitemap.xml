@@ -150,6 +150,16 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://bonomelliestate.com/en/studio.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://bonomelliestate.com/en/studio.html"/>
   </url>
+  <url><loc>https://bonomelliestate.com/dal-video.html</loc>
+    <xhtml:link rel="alternate" hreflang="it" href="https://bonomelliestate.com/dal-video.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://bonomelliestate.com/en/from-the-video.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://bonomelliestate.com/en/from-the-video.html"/>
+  </url>
+  <url><loc>https://bonomelliestate.com/en/from-the-video.html</loc>
+    <xhtml:link rel="alternate" hreflang="it" href="https://bonomelliestate.com/dal-video.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://bonomelliestate.com/en/from-the-video.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://bonomelliestate.com/en/from-the-video.html"/>
+  </url>
   <url><loc>https://bonomelliestate.com/come-lavoro.html</loc>
     <xhtml:link rel="alternate" hreflang="it" href="https://bonomelliestate.com/come-lavoro.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://bonomelliestate.com/en/how-we-work.html"/>

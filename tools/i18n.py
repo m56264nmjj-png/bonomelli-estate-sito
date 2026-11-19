@@ -110,6 +110,13 @@ PAGES = {
         "it_desc": "Bonomelli Estate è lo studio di concept visivi di Brenda Bonomelli a San Bonifacio (Verona): padiglioni, serre e arredi in pietra, dal concept alla posa.",
         "en_desc": "Bonomelli Estate is the visual concept studio of Brenda Bonomelli in San Bonifacio, near Verona, Italy: pavilions, greenhouses and stone furniture, from concept to installation.",
     },
+    "dal-video.html": {
+        "en": "from-the-video.html",
+        "it_title": "Dal video: Pavilion BONOMELLI, una biblioteca nel giardino · Bonomelli Estate",
+        "en_title": "From the video: Pavilion BONOMELLI, a library in the garden · Bonomelli Estate",
+        "it_desc": "Il Pavilion BONOMELLI che ha visto nel video: padiglione in pietra su due piani con biblioteca. Concept nel Suo giardino da 2.500 €, padiglione costruito da 350.000 €.",
+        "en_desc": "The Pavilion BONOMELLI you saw in the video: a two-storey stone pavilion with a library. Concept in your own garden from €2,500, built pavilion from €350,000.",
+    },
     "come-lavoro.html": {
         "en": "how-we-work.html",
         "it_title": "Come lavoro e quanto costa: concept, arredi in pietra, serre e padiglioni · Bonomelli Estate",

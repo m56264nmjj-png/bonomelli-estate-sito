@@ -93,7 +93,7 @@
   });
   var PJ={bonomelli:'Pavilion Bonomelli',caelo:'Pavilion Caelo',magnolia:'Pavilion Magnolia',rome:'Pavilion Rome',dhier:'Pavilion D\u2019Hier',forestier:'Pavilion Forestier',airfrais:'Pavilion Air Frais',serra:'Serra dei Sogni',convivio:'CONVIVIO'};
   var hm=(location.hash||'').match(/^#(dossier|consulenza|collaborazione)(?:-([a-z]+))?$/);
-  if(hm){document.getElementById('f-tipo').value=hm[1];if(hm[2]&&PJ[hm[2]])document.getElementById('f-progetto').value=PJ[hm[2]];setTimeout(function(){form.scrollIntoView({block:'start'})},50)}
+  if(hm){document.getElementById('f-tipo').value=hm[1];if(hm[2]&&PJ[hm[2]]){document.getElementById('f-progetto').value=PJ[hm[2]];var fm=document.getElementById('f-more');if(fm)fm.open=true}setTimeout(function(){form.scrollIntoView({block:'start'})},50)}
   }
   /* recensioni: solo quelle approvate da Brenda in JARVIS (funzione "recensioni", nessuna chiave) */
   var rf=document.getElementById('rec-form');

@@ -75,29 +75,32 @@
 
       <form class="enq" id="enq" novalidate>
         <p class="eyebrow"><span lang="it">Richiesta riservata</span><span lang="en">Private enquiry</span></p>
-        <div class="f-row">
+                <div class="f-row">
           <label class="f"><span><span lang="it">Nome e cognome</span><span lang="en">Full name</span> *</span><input id="f-nome" name="nome" required maxlength="120" autocomplete="name"></label>
           <label class="f"><span>Email *</span><input id="f-email" name="email" type="email" required maxlength="200" autocomplete="email"></label>
         </div>
+        <label class="f"><span><span lang="it">Richiesta</span><span lang="en">Request</span> *</span><select id="f-tipo" name="tipo" required>
+            <option value="" data-it="Scelga…" data-en="Choose…">Scelga…</option><option value="consulenza" selected data-it="Consulenza privata" data-en="Private consultation">Consulenza privata</option><option value="dossier" data-it="Dossier riservato" data-en="Private dossier">Dossier riservato</option><option value="collaborazione" data-it="Collaborazione" data-en="Partnership">Collaborazione</option><option value="altro" data-it="Altro" data-en="Other">Altro</option></select></label>
+        <label class="f"><span><span lang="it">Messaggio</span><span lang="en">Message</span></span><textarea id="f-msg" name="messaggio" rows="5" maxlength="3000"></textarea></label>
+        <details class="f-more" id="f-more">
+          <summary><span lang="it">Aggiunga dettagli (facoltativo)</span><span lang="en">Add details (optional)</span></summary>
         <div class="f-row">
           <label class="f"><span><span lang="it">Telefono / WhatsApp</span><span lang="en">Phone / WhatsApp</span></span><input id="f-tel" name="telefono" type="tel" maxlength="40" autocomplete="tel"></label>
           <label class="f"><span><span lang="it">Paese</span><span lang="en">Country</span></span><input id="f-paese" name="paese" maxlength="80" autocomplete="country-name"></label>
         </div>
         <div class="f-row">
-          <label class="f"><span><span lang="it">Richiesta</span><span lang="en">Request</span> *</span><select id="f-tipo" name="tipo" required>
-            <option value="" data-it="Scelga…" data-en="Choose…">Scelga…</option><option value="consulenza" data-it="Consulenza privata" data-en="Private consultation">Consulenza privata</option><option value="dossier" data-it="Dossier riservato" data-en="Private dossier">Dossier riservato</option><option value="collaborazione" data-it="Collaborazione" data-en="Partnership">Collaborazione</option><option value="altro" data-it="Altro" data-en="Other">Altro</option></select></label>
           <label class="f"><span><span lang="it">Lei è</span><span lang="en">You are</span></span><select id="f-profilo" name="profilo">
             <option value="" data-it="—" data-en="—">—</option><option value="privato" data-it="Privato" data-en="Private client">Privato</option><option value="architetto" data-it="Architetto o designer" data-en="Architect or designer">Architetto o designer</option><option value="broker" data-it="Broker o agente" data-en="Broker or agent">Broker o agente</option><option value="hotel" data-it="Hotel o resort" data-en="Hotel or resort">Hotel o resort</option><option value="azienda" data-it="Azienda" data-en="Company">Azienda</option><option value="altro" data-it="Altro" data-en="Other">Altro</option></select></label>
-        </div>
-        <div class="f-row">
           <label class="f"><span><span lang="it">Progetto di interesse</span><span lang="en">Project of interest</span></span><select id="f-progetto" name="progetto">
             <option value="" data-it="—" data-en="—">—</option><option value="Pavilion Bonomelli">Pavilion Bonomelli</option><option value="Pavilion Caelo">Pavilion Caelo</option><option value="Pavilion Magnolia">Pavilion Magnolia</option><option value="Pavilion Rome">Pavilion Rome</option><option value="Pavilion D’Hier">Pavilion D’Hier</option><option value="Pavilion Forestier">Pavilion Forestier</option><option value="Pavilion Air Frais">Pavilion Air Frais</option><option value="Serra dei Sogni" data-it="Serra dei Sogni" data-en="Dream Greenhouse">Serra dei Sogni</option><option value="SAXUM">SAXUM</option><option value="CULLAE">CULLAE</option><option value="ONDUUM">ONDUUM</option><option value="AETHER">AETHER</option><option value="AETERNUM">AETERNUM</option><option value="CONVIVIO">CONVIVIO</option><option value="HORTUS">HORTUS</option><option value="LYMPHA">LYMPHA</option><option value="COROLLA">COROLLA</option><option value="Su misura" data-it="Un progetto su misura" data-en="A bespoke project">Un progetto su misura</option></select></label>
+        </div>
+        <div class="f-row">
           <label class="f"><span><span lang="it">Preferisce essere contattato via</span><span lang="en">Preferred contact</span></span><select id="f-canale" name="canale_preferito">
             <option value="email" data-it="Email" data-en="Email">Email</option><option value="whatsapp" data-it="WhatsApp" data-en="WhatsApp">WhatsApp</option><option value="telefono" data-it="Telefono" data-en="Phone">Telefono</option></select></label>
-        </div>
-        <label class="f"><span><span lang="it">Come ci ha conosciuto</span><span lang="en">How did you find us</span></span><select id="f-fonte" name="fonte">
+          <label class="f"><span><span lang="it">Come ci ha conosciuto</span><span lang="en">How did you find us</span></span><select id="f-fonte" name="fonte">
           <option value="" data-it="—" data-en="—">—</option><option value="instagram" data-it="Instagram" data-en="Instagram">Instagram</option><option value="tiktok" data-it="TikTok" data-en="TikTok">TikTok</option><option value="linkedin" data-it="LinkedIn" data-en="LinkedIn">LinkedIn</option><option value="facebook" data-it="Facebook" data-en="Facebook">Facebook</option><option value="behance" data-it="Behance" data-en="Behance">Behance</option><option value="youtube" data-it="YouTube" data-en="YouTube">YouTube</option><option value="x" data-it="X" data-en="X">X</option><option value="threads" data-it="Threads" data-en="Threads">Threads</option><option value="google" data-it="Google" data-en="Google">Google</option><option value="passaparola" data-it="Passaparola" data-en="Word of mouth">Passaparola</option><option value="altro" data-it="Altro" data-en="Other">Altro</option></select></label>
-        <label class="f"><span><span lang="it">Messaggio</span><span lang="en">Message</span></span><textarea id="f-msg" name="messaggio" rows="5" maxlength="3000"></textarea></label>
+        </div>
+        </details>
         <label class="hp" aria-hidden="true">Website<input id="f-web" name="website" tabindex="-1" autocomplete="off"></label>
         <label class="f-check"><input id="f-privacy" type="checkbox" required><span><span lang="it">Ho letto l'<a href="privacy.html" target="_blank" rel="noopener">informativa privacy</a> e acconsento al trattamento dei miei dati per ricevere una risposta. *</span><span lang="en">I have read the <a href="privacy.html" target="_blank" rel="noopener">privacy notice</a> and agree to my data being used to reply to me. *</span></span></label>
         <button class="send" id="f-send" type="submit"><span lang="it">Invia la richiesta</span><span lang="en">Send enquiry</span></button>
