@@ -192,6 +192,10 @@ ATTR_EN = {
     "La galleria vista dall'interno": "The gallery seen from inside",
     "Il pavimento visto dall'alto": "The floor seen from above",
     "Dettaglio del mosaico vicino alle vetrate": "Mosaic detail near the glass panels",
+    "La Serra dei Sogni a Natale, versione Glicine, con la neve che cade": "The Dream Greenhouse at Christmas, Wisteria version, with snow falling",
+    "La Serra dei Sogni a Natale, versione Giglio": "The Dream Greenhouse at Christmas, Lily version",
+    "La Serra dei Sogni a Natale, versione Ortensia": "The Dream Greenhouse at Christmas, Hydrangea version",
+    "La Serra dei Sogni a Natale, versione Girasole": "The Dream Greenhouse at Christmas, Sunflower version",
 }
 
 # Nomi propri: uguali nelle due lingue.
