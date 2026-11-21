@@ -20,14 +20,8 @@ SERRA = "serra-dei-sogni.html"
 
 # (data, immagine, titolo, descrizione, pagina)
 PIN = [
-    ("2026-11-21", "serra-glicine-natale.jpg", "Serra Glicine a Natale · Bonomelli Estate | Christmas greenhouse, winter garden, glass conservatory",
-     "La Serra dei Sogni a Natale: una galleria ad archi in ferro brunito e vetro, con le vetrate a glicine, la neve fuori e le luci dentro. Su commissione privata. An iron and glass garden gallery at Christmas, by private commission.", SERRA + "#natale"),
-    ("2026-11-21", "serra-giglio-natale.jpg", "Serra Giglio a Natale · Bonomelli Estate | Christmas orangery, winter garden lights",
-     "La Serra dei Sogni a Natale, versione Giglio: archi in ferro brunito, vetrate decorate, lanterne sul mosaico di ciottoli. Su commissione privata. A bespoke iron and glass orangery dressed for Christmas.", SERRA + "#natale"),
-    ("2026-11-21", "serra-ortensia-natale.jpg", "Serra Ortensia a Natale · Bonomelli Estate | Christmas conservatory, luxury winter garden",
-     "La Serra dei Sogni a Natale, versione Ortensia: ferro brunito, vetro e un pavimento a mosaico di ciottoli, sotto la neve. Su commissione privata. A luxury winter garden in iron and glass.", SERRA + "#natale"),
-    ("2026-11-21", "serra-girasole-natale.jpg", "Serra Girasole a Natale · Bonomelli Estate | Christmas greenhouse, garden room",
-     "La Serra dei Sogni a Natale, versione Girasole: una galleria vetrata ad archi per vivere il giardino d’inverno. Su commissione privata. An arched glass garden room for winter.", SERRA + "#natale"),
+    # I quattro Pin di Natale sono stati tolti il 21/11: il pavimento a mosaico non era quello giusto.
+    # Si rimettono quando le immagini di Natale sono rifatte con i pavimenti veri (img/*-alto.webp).
     ("2026-11-21", "serra-glicine.jpg", "Serra Glicine · Bonomelli Estate | Wisteria stained glass greenhouse, iron and glass orangery",
      "Serra dei Sogni, versione Glicine: galleria ad archi in ferro brunito e vetro, vetrate a glicine e pavimento a mosaico di ciottoli Via Florae. Su commissione privata. A bespoke iron and glass greenhouse with wisteria stained glass.", SERRA),
     ("2026-11-21", "serra-giglio.jpg", "Serra Giglio · Bonomelli Estate | Lily stained glass conservatory, luxury garden",
