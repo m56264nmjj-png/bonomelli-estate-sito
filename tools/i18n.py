@@ -93,7 +93,7 @@ PAGES = {
         "en": "reviews.html",
         "it_title": "Recensioni · Bonomelli Estate, padiglioni e arredi in pietra di Brenda Bonomelli",
         "en_title": "Reviews · Bonomelli Estate, stone pavilions and furniture by Brenda Bonomelli",
-        "it_desc": "Le recensioni dei visitatori su Bonomelli Estate, lo studio di Brenda Bonomelli: CONVIVIO, la Serra dei Sogni, i padiglioni e gli arredi in pietra. Lasci anche la sua.",
+        "it_desc": "Le recensioni dei visitatori su Bonomelli Estate, lo studio di Brenda Bonomelli: CONVIVIO, la Serra dei Sogni, i padiglioni e gli arredi in pietra. Lascia anche la tua.",
         "en_desc": "Visitor reviews of Bonomelli Estate, Brenda Bonomelli’s studio: CONVIVIO, the Dream Greenhouse, the pavilions and the stone furniture. Leave yours too.",
     },
     "corolla.html": {
@@ -114,7 +114,7 @@ PAGES = {
         "en": "from-the-video.html",
         "it_title": "Dal video: Pavilion BONOMELLI, una biblioteca nel giardino · Bonomelli Estate",
         "en_title": "From the video: Pavilion BONOMELLI, a library in the garden · Bonomelli Estate",
-        "it_desc": "Il Pavilion BONOMELLI che ha visto nel video: padiglione in pietra su due piani con biblioteca. Concept nel Suo giardino da 2.500 €, padiglione costruito da 350.000 €.",
+        "it_desc": "Il Pavilion BONOMELLI che hai visto nel video: padiglione in pietra su due piani con biblioteca. Concept nel tuo giardino da 2.500 €, padiglione costruito da 350.000 €.",
         "en_desc": "The Pavilion BONOMELLI you saw in the video: a two-storey stone pavilion with a library. Concept in your own garden from €2,500, built pavilion from €350,000.",
     },
     "come-lavoro.html": {
@@ -128,7 +128,7 @@ PAGES = {
         "en": "contact.html",
         "it_title": "Contatti, consulenza privata e dossier riservato · Bonomelli Estate",
         "en_title": "Contact, private consultation and private dossier · Bonomelli Estate",
-        "it_desc": "Scriva allo studio Bonomelli Estate: consulenza privata, dossier riservato, collaborazioni. studio@bonomelliestate.it · +39 351 657 5517.",
+        "it_desc": "Scrivi allo studio Bonomelli Estate: consulenza privata, dossier riservato, collaborazioni. studio@bonomelliestate.it · +39 351 657 5517.",
         "en_desc": "Write to the Bonomelli Estate studio: private consultation, private dossier, collaborations. studio@bonomelliestate.it · +39 351 657 5517.",
     },
     "privacy.html": {

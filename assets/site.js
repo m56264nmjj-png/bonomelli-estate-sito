@@ -82,13 +82,13 @@
     var v=function(id){return document.getElementById(id).value.trim()};
     var bad=[];
     [['f-nome',v('f-nome').length>=2],['f-email',/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('f-email'))],['f-tipo',!!v('f-tipo')],['f-privacy',document.getElementById('f-privacy').checked]].forEach(function(c){document.getElementById(c[0]).setAttribute('aria-invalid',c[1]?'false':'true');if(!c[1])bad.push(c[0])});
-    if(bad.length){st.classList.add('err');st.textContent=T('Completi i campi segnati: nome, email valida, tipo di richiesta e consenso privacy.','Please complete the marked fields: name, a valid email, request type and privacy consent.');document.getElementById(bad[0]).focus();return}
+    if(bad.length){st.classList.add('err');st.textContent=T('Completa i campi segnati: nome, email valida, tipo di richiesta e consenso privacy.','Please complete the marked fields: name, a valid email, request type and privacy consent.');document.getElementById(bad[0]).focus();return}
     if(v('f-web')){st.classList.add('ok');st.textContent=T('Grazie.','Thank you.');return}
     var data={nome:v('f-nome'),email:v('f-email'),telefono:v('f-tel')||null,paese:v('f-paese')||null,tipo:v('f-tipo'),profilo:v('f-profilo')||null,progetto:v('f-progetto')||null,canale_preferito:v('f-canale')||null,fonte:v('f-fonte')||null,messaggio:v('f-msg')||null,lingua:root.lang==='en'?'en':'it',consenso_privacy:true};
     btn.disabled=true;st.textContent=T('Invio in corso…','Sending…');
     fetch(MODULO,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
-    .then(function(r){if(!r.ok)throw new Error(r.status);form.reset();st.classList.add('ok');st.textContent=T('Grazie. La sua richiesta è arrivata allo studio: le risponderemo personalmente.','Thank you. Your enquiry has reached the studio: we will reply to you personally.')})
-    .catch(function(){st.classList.add('err');st.textContent=T('Non è stato possibile inviare la richiesta. Scriva a studio@bonomelliestate.it o su WhatsApp al +39 351 657 5517.','Your enquiry could not be sent. Please write to studio@bonomelliestate.it or on WhatsApp at +39 351 657 5517.')})
+    .then(function(r){if(!r.ok)throw new Error(r.status);form.reset();st.classList.add('ok');st.textContent=T('Grazie. La tua richiesta è arrivata allo studio: ti risponderemo personalmente.','Thank you. Your enquiry has reached the studio: we will reply to you personally.')})
+    .catch(function(){st.classList.add('err');st.textContent=T('Non è stato possibile inviare la richiesta. Scrivi a studio@bonomelliestate.it o su WhatsApp al +39 351 657 5517.','Your enquiry could not be sent. Please write to studio@bonomelliestate.it or on WhatsApp at +39 351 657 5517.')})
     .finally(function(){btn.disabled=false});
   });
   var PJ={bonomelli:'Pavilion Bonomelli',caelo:'Pavilion Caelo',magnolia:'Pavilion Magnolia',rome:'Pavilion Rome',dhier:'Pavilion D\u2019Hier',forestier:'Pavilion Forestier',airfrais:'Pavilion Air Frais',serra:'Serra dei Sogni',convivio:'CONVIVIO'};
@@ -102,7 +102,7 @@
     var R=function(it,en){return root.lang==='en'?en:it};
     var esc=function(x){return String(x==null?'':x).replace(/[&<>"']/g,function(c){return '&#'+c.charCodeAt(0)+';'})};
     fetch(RC).then(function(x){return x.json()}).then(function(a){
-      if(!a.length){rl.innerHTML='<p class="vnote">'+R('Ancora nessuna recensione pubblicata. Può essere la prima persona a lasciarne una.','No reviews published yet. You can be the first to leave one.')+'</p>';return}
+      if(!a.length){rl.innerHTML='<p class="vnote">'+R('Ancora nessuna recensione pubblicata. Puoi essere la prima persona a lasciarne una.','No reviews published yet. You can be the first to leave one.')+'</p>';return}
       var media=a.reduce(function(s,x){return s+x.voto},0)/a.length;
       rl.innerHTML='<p class="eyebrow">'+'★'.repeat(Math.round(media))+'☆'.repeat(5-Math.round(media))+' · '+media.toFixed(1).replace('.',root.lang==='en'?'.':',')+'/5 · '+a.length+' '+R(a.length===1?'recensione':'recensioni',a.length===1?'review':'reviews')+'</p>'+a.map(function(x){
         var d=new Date(x.creato_at).toLocaleDateString(root.lang==='en'?'en-GB':'it-IT',{month:'long',year:'numeric'});
@@ -111,11 +111,11 @@
     rf.addEventListener('submit',function(e){
       e.preventDefault();var st=document.getElementById('r-status'),b=document.getElementById('r-send');st.className='f-msg';
       var g=function(id){return document.getElementById(id).value.trim()};
-      if(g('r-nome').length<2||g('r-testo').length<10||!document.getElementById('r-consenso').checked){st.classList.add('err');st.textContent=R('Scriva nome, una recensione di almeno 10 caratteri e dia il consenso.','Please add your name, a review of at least 10 characters and your consent.');return}
+      if(g('r-nome').length<2||g('r-testo').length<10||!document.getElementById('r-consenso').checked){st.classList.add('err');st.textContent=R('Scrivi nome, una recensione di almeno 10 caratteri e dai il consenso.','Please add your name, a review of at least 10 characters and your consent.');return}
       b.disabled=true;st.textContent=R('Invio…','Sending…');
       fetch(RC,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:g('r-nome'),citta:g('r-citta'),voto:+g('r-voto'),pezzo:g('r-pezzo'),testo:g('r-testo'),web:g('r-web'),consenso:true,lingua:root.lang==='en'?'en':'it'})})
-      .then(function(x){if(!x.ok)throw new Error(x.status);rf.reset();st.classList.add('ok');st.textContent=R('Grazie! La sua recensione è arrivata: comparirà dopo la lettura di Brenda.','Thank you! Your review has arrived: it will appear once Brenda has read it.')})
-      .catch(function(){st.classList.add('err');st.textContent=R('Non è stato possibile inviarla. Riprovi tra poco (i link nel testo non sono ammessi).','It could not be sent. Please try again shortly (links are not allowed in the text).')})
+      .then(function(x){if(!x.ok)throw new Error(x.status);rf.reset();st.classList.add('ok');st.textContent=R('Grazie! La tua recensione è arrivata: comparirà dopo la lettura di Brenda.','Thank you! Your review has arrived: it will appear once Brenda has read it.')})
+      .catch(function(){st.classList.add('err');st.textContent=R('Non è stato possibile inviarla. Riprova tra poco (i link nel testo non sono ammessi).','It could not be sent. Please try again shortly (links are not allowed in the text).')})
       .finally(function(){b.disabled=false});
     });
   }
