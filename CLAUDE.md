@@ -19,3 +19,10 @@ Sito statico pubblicato con GitHub Pages su https://bonomelliestate.com (ramo `m
 
 - `jarvis/` è l'app privata di Brenda: non fa parte del sito pubblico e non passa dal build.
 - Questo repository è pubblico tramite GitHub Pages: non salvarci note private o dati di clienti.
+
+## Pinterest
+
+- `pinterest.xml` è l'elenco (feed RSS) che Pinterest legge per creare i Pin da solo. Si genera con
+  `python3 tools/pinterest.py`: per un Pin nuovo si aggiunge una riga in `PIN` dentro lo script e si rilancia.
+- Le immagini dei Pin stanno in `img/pin/` (verticali, JPEG, con la firma ©).
+- Il tag `p:domain_verify` nella home serve a Pinterest: non toglierlo.
